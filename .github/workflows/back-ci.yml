@@ -1,0 +1,21 @@
+# back/ 을 건드린 PR에서만 실행
+name: back-ci
+on:
+  pull_request:
+    paths: ['back/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: back
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+      # sh로 실행 — 윈도우에서 커밋되면 mvnw에 실행 권한이 없을 수 있어서
+      - run: sh ./mvnw -B test
