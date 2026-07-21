@@ -1,0 +1,82 @@
+/* 전역 스타일 — 모든 화면에 적용된다 (main.jsx에서 한 번만 불러온다).
+ *
+ * 공용 패턴은 클래스 3개가 전부다:
+ *   .page   — 페이지 레이아웃 (모든 화면의 최상위 <main>에 붙인다)
+ *   .action — 큰 버튼 (핵심 행동용. <a>든 <Link>든 붙이면 똑같이 보인다)
+ *   .card   — 고대비 카드 (안내문·상태 표시용 박스)
+ * 새 화면에서 이 밖의 스타일이 필요하면 여기 추가하기 전에 T에게 먼저 물어본다.
+ * 모바일 화면 기준으로 작성돼 있다 (응급 사용자는 휴대폰으로 접속한다고 가정). */
+:root {
+  --danger: #c62828; /* 119·응급 강조색. 빨강은 이 용도로만 쓴다 */
+  --text: #1a1a1a;
+  --bg: #ffffff;
+  --border: #444444; /* 테두리를 일부러 진하게 — 야외·햇빛 아래에서도 보이게 (N-04 접근성) */
+  font: 18px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif; /* 기기 기본 글꼴 = 추가 다운로드 없음 */
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box; /* padding·border를 너비에 포함 — 크기 계산이 직관적이 된다 */
+}
+
+body {
+  margin: 0; /* 브라우저 기본 여백 제거 */
+}
+
+/* F-17 — 119 배너 (components/Banner119.jsx)
+ * sticky: 스크롤을 내려도 화면 최상단에 계속 붙어 있다 */
+.banner119 {
+  position: sticky;
+  top: 0;
+  display: block;
+  padding: 14px 16px;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* 페이지 레이아웃 — 모든 화면은 <main className="page">로 시작한다.
+ * 세로로 쌓고(flex-direction: column) 요소 사이 간격은 gap 하나로 통일 —
+ * 개별 요소에 margin을 따로 주지 말 것 (간격이 제각각이 되는 걸 막는다) */
+.page {
+  max-width: 480px; /* 휴대폰 폭 기준. PC에서는 가운데 좁은 기둥으로 보인다 */
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 큰 버튼 — 핵심 행동은 전부 이 클래스로, 전부 같은 크기 (N-04).
+ * 경황없는 사용자가 한 손가락으로 확실히 누를 수 있는 크기가 목표다.
+ * 특정 행동만 크거나 작게 만들지 않는다 — 크기 차이가 곧 유도가 되기 때문 */
+.action {
+  display: block;
+  padding: 20px 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* 119처럼 가장 급한 행동에만 덧붙인다: <a className="action action--danger">
+ * 단, 색만으로 구분하지 않는다 — 아이콘·문구를 반드시 함께 쓴다 (N-04) */
+.action--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+/* 고대비 카드 — 안내문·상태 표시용 박스 */
+.card {
+  padding: 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+}
