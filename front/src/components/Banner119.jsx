@@ -8,10 +8,27 @@
 //
 // tel:119 — 휴대폰에서 누르면 바로 전화 앱이 열린다.
 // PC에서는 동작하지 않으므로 "PC면 문구로 안내" 처리가 필요하다 (F3의 SP1 과제, 가이드 FE 참고).
+
+/**User-Agent가 모바일 기기인지 확인*/
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 export default function Banner119() {
-  return (
-    <a className="banner119" href="tel:119">
-      🚨 응급 상황이라면 지금 119에 신고하세요
-    </a>
-  )
+
+  /** User-Agent가 모바일이면 119 바로가기 출력, 아니면 문구 안내 처리 */
+  if (isMobile) {
+    return (
+      <a className="banner119" href="tel:119">
+        🚨 응급 상황이라면 지금 119에 신고하세요
+      </a>
+    )
+  } else {
+    return (
+      <div className="banner119">
+        {/* TODO: 알림 팝업이 아닌 모달로 대체, 순서 설명하기 */}
+        <a onClick={() => alert("이 기기에서는 바로 전화할 수 없습니다. 119에 직접 전화하세요.")}>
+          🚨 응급 상황이라면 직접 119에 신고하세요
+        </a>
+      </div>
+    )
+  }
 }
