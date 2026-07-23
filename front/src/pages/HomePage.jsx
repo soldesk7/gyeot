@@ -6,7 +6,9 @@
 //
 // 홈의 핵심 규칙 (N-04): 119 신고·사진 업로드·증상 선택, 세 행동이
 // 똑같은 크기로, 첫 화면에서 스크롤 없이 한 번의 탭으로 눌려야 한다.
+
 import { Link } from 'react-router-dom'
+import Call119 from '../components/Call119.jsx'
 
 export default function HomePage() {
   return (
@@ -16,7 +18,11 @@ export default function HomePage() {
 
       {/* 전화는 <a href="tel:">, 앱 안의 화면 이동은 <Link to="">를 쓴다.
           <Link>는 새로고침 없이 화면만 바꿔 줘서 빠르다 — 내부 이동에 <a>를 쓰지 말 것 */}
-      <a className="action action--danger" href="tel:119">📞 119 신고</a>
+      <Call119
+        className="action action--danger"
+        mobileLabel="📞 119 신고"
+        pcButtonStyle={{ cursor: 'pointer' }}
+      />
       <Link className="action" to="/result">📷 사진으로 상황 확인</Link>
       <Link className="action" to="/guide">📋 증상 직접 선택</Link>
 
