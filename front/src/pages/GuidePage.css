@@ -1,0 +1,37 @@
+video, img {
+  width: 100%;
+  max-width: 100%;
+  height: 200px;
+  object-fit: contain;
+  background: #000;
+  border-radius: 8px;
+}
+.guide-header {
+  display: flex;
+  justify-content: space-between; /* 왼쪽엔 제목, 오른쪽 끝엔 버튼 */
+  align-items: center; /* 세로 가운데 정렬 */
+  gap: 8px;
+}
+
+.guide-back {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  color: var(--border);
+  background: var(--bg);
+  white-space: nowrap;
+}
+.guide-step {
+  list-style: none; /* <ol>의 자동 번호(1. 2. 3.) 끄기 */
+}
+
+.guide-step__number {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
