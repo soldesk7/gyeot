@@ -61,17 +61,22 @@ export default function Call119({
               textAlign: 'left',
             }}
           >
-            <h2 id={guideTitleId} style={{ marginTop: 0 }}>119 신고 순서</h2>
+            <p style={{ marginTop: 0 }}>직접 전화 앱에서 <a href="tel:119">119</a>로 연결해주세요.</p>
+            <h2 id={guideTitleId}>119 신고 순서</h2>
             <ol style={{ paddingLeft: 24 }}>
               <li>현재 위치를 먼저 알려주세요.</li>
               <li>무슨 일이 있었는지와 환자 상태를 설명해주세요.</li>
               <li>119 상황실의 질문에 답하고 안내에 따라주세요.</li>
             </ol>
-            <p>이 기기에서는 바로 전화할 수 없으니 전화 앱에서 119로 연결해주세요.</p>
             <button
               type="button"
               className="action"
               onClick={() => setIsReportGuideOpen(false)}
+              style={{
+                width: 'fit-content',
+                margin: '0 auto', 
+                padding: '16px 32px'
+              }}
             >
               확인
             </button>
