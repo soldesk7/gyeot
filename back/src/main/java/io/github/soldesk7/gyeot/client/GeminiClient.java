@@ -29,7 +29,7 @@ public class GeminiClient {
                         .text(PROMPT) // 텍스트: 우리가 정한 고정 프롬프트
                 .media(MimeTypeUtils.parseMimeType(mimeType), new ByteArrayResource(imageBytes))) // 미디어: 업로드된 사진 (멀티모달 입력)
                 .options(GoogleGenAiChatOptions.builder() // 3. 이번 요청에만 적용할 옵션
-                        .thinkingBudget(0) // thinking 끄기 — 안 끄면 JSON이 중간에 잘림
+                        .thinkingBudget(1) // thinking 끄기 — 안 끄면 JSON이 중간에 잘림
                         .maxOutputTokens(4000)) // 최대 토큰 수 제한 (여유 있게)
                 .call() // 4. 실제 Gemini api에 요청 전송
                 .entity(Result.class); // 5. 응답 텍스트를 Result record로 자동 파싱
