@@ -38,8 +38,8 @@ export default function GuidePage() {
   {CATEGORY_STEPS[category].map((step, i) => (
     <li key={i} className="guide-step">
   <span className="guide-step__number">{i + 1}단계</span>
-  {step.videoUrl && <video src={step.videoUrl} controls />}
-  {step.imageUrl && <img src={step.imageUrl} />}
+  {step.videoUrl && <video className="guide-video" src={step.videoUrl} controls />}
+  {step.imageUrl && <img className="guide-img" src={step.imageUrl} />}
   {step.text && <p>{step.text}</p>}
   {!step.text && !step.imageUrl && !step.videoUrl && '(내용 준비 중)'}
 </li>
