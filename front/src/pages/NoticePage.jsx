@@ -3,23 +3,31 @@
 // 서버 API가 필요 없는 정적 화면이다 — 문구를 이 파일(JSX) 안에 직접 쓰면 된다.
 // 처리 고지에는 "이용 목적·무저장·즉시 폐기" 세 가지가 반드시 들어가야 하고,
 // 업로드 화면(화면 B)의 고지 문구에서 이 페이지로 링크가 연결된다 (F4 SP2 과제).
+import { useState } from "react";
+const [photoOpen, setPhotoOpen] = useState(false);
+
 export default function NoticePage() {
   return (
     <main className="page">
       <h1>이용 안내</h1>
 
       <p>
-        본 서비스는 AI를 활용하여 응급 상황을 분류하고, 상황에 맞는 응급처치 정보를 제공하는 웹서비스입니다. 
+        본 서비스는 응급 상황에서 참고할 수 있는 안내를 제공하는 웹서비스입니다. 
         <br />
         AI의 분류 결과는 참고용이며, 사용자의 확인 후 공식 기관의 응급처치 안내를 제공합니다.
         응급 상황에서는 119 신고를 가장 먼저 해주시기 바랍니다.
-        <br />
+      </p>
+
+      <p>
         서비스 이용 전 아래 내용을 확인해 주세요.
       </p>
 
 
       <section className="card">
-        <h2>사진 처리 고지</h2>
+        
+        <h2 onClick={() => setPhotoOpen(!photoOpen)}>
+          사진 처리 고지 {photoOpen ? "▲" : "▼"}
+        </h2>
 
         <p>
           업로드한 사진은 응급 상황 분류를 위한 AI 인식 목적으로만 사용됩니다.
@@ -27,6 +35,9 @@ export default function NoticePage() {
           사진은 분석 완료 후 즉시 폐기되며,
           별도로 저장하거나 다른 목적으로 이용하지 않습니다.
         </p>
+
+        {photoOpen && (
+          <>
         <h3>제1조(목적)</h3>
         <p>
           본 서비스는 사용자가 업로드한 사진을 AI 기반 응급 상황 분류 및
@@ -54,13 +65,18 @@ export default function NoticePage() {
           사용자는 사진 처리에 동의하지 않을 수 있으며,
           동의하지 않을 경우 AI 응급 상황 분류 기능 이용이 제한될 수 있습니다.
         </p>
-        
+        </>
+        )}
       </section>
 
 
       <section className="card">
-        <h2>개인정보 처리방침</h2>
+        <h2 onClick={() => setPhotoOpen(!photoOpen)}>
+          개인정보 처리방침{photoOpen ? "▲" : "▼"}
+        </h2>
 
+        {photoOpen && (
+          <>
         <h3>제1조(처리 목적)</h3>
         <p>
           AI 기반 응급 상황 분류 및 응급처치 안내 제공을 위해 필요한 정보를
@@ -80,16 +96,22 @@ export default function NoticePage() {
         <p>
           법령에 따른 경우를 제외하고 제3자에게 제공하지 않습니다.
         </p>
+        </>
+        )}
       </section>
 
       <section className="card">
-        <h2>AI 이용 안내</h2>
+        <h2 onClick={() => setPhotoOpen(!photoOpen)}>
+          AI 이용 안내{photoOpen ? "▲" : "▼"}
+        </h2>
 
         <p>
           AI 분석 결과는 참고용 정보이며,
           의료인의 진단을 대신하지 않습니다.
         </p>
 
+        {photoOpen && (
+          <>
         <h3>제1조(AI 서비스)</h3>
         <p>
           AI를 이용하여 응급 상황을 분류하고 응급처치 정보를 제공합니다.
@@ -110,16 +132,22 @@ export default function NoticePage() {
           응급 상황에서는 AI 결과보다 119 신고 및 의료기관의 도움을
           우선해야 합니다.
         </p>
+        </>
+        )}
       </section>
 
       <section className="card">
-        <h2>위치정보 이용 안내</h2>
+        <h2 onClick={() => setPhotoOpen(!photoOpen)}>
+          위치정보 이용 안내{photoOpen ? "▲" : "▼"}
+        </h2>
 
         <p>
           위치 권한에 동의한 경우 주변 응급의료기관 안내를 위해 위치정보를
           이용합니다.
         </p>
 
+        {photoOpen && (
+          <>
         <h3>제1조(목적)</h3>
         <p>
           주변 응급의료기관 및 응급실 안내를 위해 위치정보를 이용합니다.
@@ -130,6 +158,8 @@ export default function NoticePage() {
 
         <h3>제3조(보관)</h3>
         <p>위치정보는 안내 목적으로만 사용되며 별도로 저장하지 않습니다.</p>
+        </>
+        )}
       </section>
 
     </main>
