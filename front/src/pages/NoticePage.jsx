@@ -49,7 +49,7 @@ export default function NoticePage() {
               업로드한 사진은 응급 상황 분류를 위한 AI 인식 목적으로만 이용됩니다.
               <br />
               사진은 분석 완료 후 즉시 폐기되며,
-              별도로 저장하거나 다른 목적으로 이용하지 않습니다. 제3자에게 제공하지 않습니다.
+              별도로 저장하거나 다른 목적으로 이용하지 않습니다.
             </p>
 
             <b onClick={() => setPhotoDetailOpen(!photoDetailOpen)}>
