@@ -83,7 +83,7 @@ export default function NoticePage() {
       </section>
 
       <section className="card">
-        <h2>🤖 AI 이용 안내</h2>
+        <h2>AI 이용 안내</h2>
 
         <p>
           AI 분석 결과는 참고용 정보이며,
@@ -113,7 +113,7 @@ export default function NoticePage() {
       </section>
 
       <section className="card">
-        <h2>📍 위치정보 이용 안내</h2>
+        <h2>위치정보 이용 안내</h2>
 
         <p>
           위치 권한에 동의한 경우 주변 응급의료기관 안내를 위해 위치정보를
