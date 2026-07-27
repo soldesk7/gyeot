@@ -58,8 +58,12 @@ public class EmergencyRoomClient {
         /** 
          * read: 연결된 뒤 응답 데이터를 기다리는 시간. 연결은 됐는데 서버가 처리를 못 끝내는 경우 걸린다.
          * 공공데이터 문서상 이 API의 평균 응답 시간이 500ms이므로, 5초로 10배 여유를 잡았다.
+         * 전국 목록(534건·230KB) 실측에 소요되는 시간이 약 7초였다.
+         * 문서값을 믿고 5초로 뒀다가 간헐적 타임아웃이 발생해 실측 기준으로 상향한다. (10초)
+         * 
+         * (약 7초는 촌각을 다투는 본 서비스에서 너무 긴 시간 -> 근본 해결은 캐싱 — 후속 이슈)
          */
-        requestFactory.setReadTimeout(Duration.ofSeconds(5));
+        requestFactory.setReadTimeout(Duration.ofSeconds(10));
 
         this.restClient = builder
                 .baseUrl(BASE_URL)
