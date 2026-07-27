@@ -1,8 +1,8 @@
 # application-local.properties 로 복사한 뒤 실제 값을 채워 넣으세요.
 # application-local.properties 자체는 커밋하지 않습니다(back/.gitignore 처리).
 
-gyeot.gemini.api-key=
-gyeot.gemini.model=gemini-flash-latest
+spring.ai.google.genai.api-key=
+spring.ai.google.genai.chat.model=gemini-flash-latest
 
 # 공공데이터포털 활용신청 승인 후 채움 (docs/plan-6weeks.md 사전 준비 항목)
 gyeot.public-data.api-key=

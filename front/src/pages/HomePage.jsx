@@ -19,6 +19,7 @@ export default function HomePage() {
       <a className="action action--danger" href="tel:119">📞 119 신고</a>
       <Link className="action" to="/result">📷 사진으로 상황 확인</Link>
       <Link className="action" to="/guide">📋 증상 직접 선택</Link>
+      <Link className="action" to="/map">🏥 응급실 지도</Link>
 
       {/* 비진단 고지 — AI가 진단하는 서비스로 보이면 안 된다 (불변 원칙 1) */}
       <div className="card">
