@@ -4,12 +4,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-/**
- * Jackson 애너테이션은 두 곳에서 온다 — 헷갈리기 쉬운 지점이다. 
- * com.fasterxml.jackson.annotation : 형식(JSON/XML)과 무관한 공용 애너테이션 
- * tools.jackson.dataformat.xml : XML 전용 애너테이션 (Jackson 3부터 groupId가 tools.jackson) 
- * 인터넷 예제 대부분은 Jackson 2 기준이라 XML 쪽도 com.fasterxml...로 되어 있다. 그대로 쓰면 안 된다.
- */
 import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
@@ -101,18 +95,19 @@ public record EgytListInfoResponse(Header header, Body body) {
         public List<Item> items() {
             return items;
         }
+    }
 
-        /**
-         * 응급의료기관 1곳. 응답에는 주소·응급실전화(dutyTel3)·기관등급(dutyEmclsName)·기관ID 등도 오지만 우리 계약(EmergencyRoom)에 필요한 3개만 받는다. 
-         * 선언하지 않은 나머지는 위의 @JsonIgnoreProperties 덕분에 그냥 버려진다. 
-         * (dutyTel3·dutyEmclsName은 화면에 유용할 수 있어 향후 계약 확장 시 후보다)
-         */
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public record Item(
-                String dutyName, // 기관명 -> EmergencyRoom.name
-                double wgs84Lat, // 위도   -> EmergencyRoom.lat
-                double wgs84Lon // 경도   -> EmergencyRoom.lng
-                ) {
-        }
+    /**
+     * 응급의료기관 1곳. 응답에는 주소·응급실전화(dutyTel3)·기관등급(dutyEmclsName)·기관ID 등도 오지만 우리 계약(EmergencyRoom)에 필요한 3개만 받는다. 
+     * 선언하지 않은 나머지는 위의 @JsonIgnoreProperties 덕분에 그냥 버려진다. 
+     * (dutyTel3·dutyEmclsName은 화면에 유용할 수 있어 향후 계약 확장 시 후보다)
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Item(
+            String dutyName, // 기관명 -> EmergencyRoom.name
+            double wgs84Lat, // 위도   -> EmergencyRoom.lat
+            double wgs84Lon // 경도   -> EmergencyRoom.lng
+            ) {
+
     }
 }
