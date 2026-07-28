@@ -105,8 +105,8 @@ public record EgytListInfoResponse(Header header, Body body) {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Item(
             String dutyName, // 기관명 -> EmergencyRoom.name
-            double wgs84Lat, // 위도   -> EmergencyRoom.lat
-            double wgs84Lon // 경도   -> EmergencyRoom.lng
+            Double  wgs84Lat, // 위도  -> EmergencyRoom.lat (일부 기관은 좌표가 비어 있어 래퍼 타입 사용 (null 허용))
+            Double  wgs84Lon // 경도   -> EmergencyRoom.lng
             ) {
 
     }
