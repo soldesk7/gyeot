@@ -1,0 +1,80 @@
+/*
+    UploadNotice 전용 CSS
+
+    다른 화면의 스타일에 영향을 주지 않기 위해 태그 선택자(div, button 등)를 사용하지 않고
+    upload-notice 전용 class만 사용함
+
+    SPA 환경에서는 CSS가 전역 적용될 수 있으므로 반드시 범위 제한
+*/
+.upload-notice {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0, 0, 0, 0.5);       /* rgna() 사용해 뒤 배경 반투명하게 만들어 팝업에 집중하도록 함 */
+
+  z-index: 1000;
+}
+
+
+/*
+    실제 팝업 내용 영역
+
+    흰색 박스로 만들어 사용자에게 보이는 모달(팝업) 창 역할
+*/
+.upload-notice-box {
+  width: 90%;
+  max-width: 420px;
+
+  padding: 20px;
+
+  background: white;
+
+  border: 2px solid #444;
+  border-radius: 8px;
+}
+
+/* 제목 위쪽 여백 제거 */
+.upload-notice-box h2 {
+  margin-top: 0;
+}
+
+/* 처리방침 이동 링크 _ 추후 /notice 페이지로 이동용 */
+.upload-notice-link {
+  display: block;
+
+  margin-top: 16px;
+
+  text-decoration: underline;
+}
+
+/* 버튼 - 2개 버튼 가로로 배치 */
+.upload-notice-buttons {
+  display: flex;
+
+  gap: 12px;
+
+  margin-top: 20px;
+}
+
+
+/* 버튼 공통 스타일 _ 두 버튼 크기 설정 */
+.upload-notice-buttons button {
+  flex: 1;
+
+  padding: 12px;
+
+  border: 2px solid #444;
+
+  border-radius: 8px;
+
+  background: white;
+
+  font-size: 16px;
+
+  /* 마우스 올릴 시 클릭 가능한 요소로 표시 */
+  cursor: pointer;
+}
