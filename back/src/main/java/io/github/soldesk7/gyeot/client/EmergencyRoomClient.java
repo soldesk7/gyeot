@@ -1,14 +1,15 @@
 package io.github.soldesk7.gyeot.client;
 
-import io.github.soldesk7.gyeot.dto.EgytListInfoResponse;
+import java.time.Duration;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import tools.jackson.dataformat.xml.XmlMapper;
 
-import java.time.Duration;
-import java.util.List;
+import io.github.soldesk7.gyeot.dto.EgytListInfoResponse;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 /**
  * 공공데이터포털 응급의료정보조회서비스(ErmctInfoInqireService) 호출 담당.
@@ -20,6 +21,7 @@ import java.util.List;
 @Component
 public class EmergencyRoomClient {
 
+    private static final String BASE_URL = "http://apis.data.go.kr/B552657/ErmctInfoInqireService";
     /**
      * 응급의료기관 목록정보 조회 — 주소·진료요일 등으로 필터할 수 있으나, 조건 없이 호출하면 전국 목록을 준다.
      * 위치정보 조회(Lcinfo)와 달리 진료시간 필터가 없어 밤에도 결과가 유지된다.
@@ -71,7 +73,7 @@ public class EmergencyRoomClient {
         requestFactory.setReadTimeout(Duration.ofSeconds(10));
 
         this.restClient = builder
-                .baseUrl(PATH_LIST)
+                .baseUrl(BASE_URL)
                 .requestFactory(requestFactory)
                 .build();
     }
