@@ -1,3 +1,5 @@
+import Call119 from './Call119.jsx'
+
 // F-17 — 119 우선 배너. 담당: F3
 //
 // 규칙 (N-01 — 어기면 안 됨):
@@ -6,12 +8,21 @@
 //   - 서버·API 상태와 무관하게 즉시 떠야 하므로, 이 컴포넌트에는
 //     fetch·로딩 상태 같은 걸 절대 넣지 않는다. 정적인 링크 하나만으로 처리한다.
 //
-// tel:119 — 휴대폰에서 누르면 바로 전화 앱이 열린다.
-// PC에서는 동작하지 않으므로 "PC면 문구로 안내" 처리가 필요하다 (F3의 SP1 과제, 가이드 FE 참고).
+// 모바일·PC 분기와 119 연결은 Call119가 담당한다.
+
 export default function Banner119() {
   return (
-    <a className="banner119" href="tel:119">
-      🚨 응급 상황이라면 지금 119에 신고하세요
-    </a>
+    <Call119
+      className="banner119"
+      mobileLabel="🚨 응급 상황이라면 지금 119에 신고하세요"
+      pcLabel="🚨 응급 상황이라면 직접 119에 신고하세요"
+      pcButtonStyle={{
+        width: '100%',
+        border: 0,
+        fontFamily: 'inherit',
+        fontSize: 'inherit',
+        cursor: 'pointer',
+      }}
+    />
   )
 }

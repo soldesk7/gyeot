@@ -6,14 +6,15 @@
 //     수동 선택(/guide)으로 가는 버튼을 같은 크기로 유지한다 — 빈 화면 금지 (N-08)
 //   - "맞나요?" 확인 버튼과 "잘 모르겠어요" 버튼도 같은 크기로 (아키텍처 문서 6절)
 //   - 확신도 판정은 BFF가 한다 — 프론트에서 0.6 같은 기준값을 만들지 않는다
-import { Link } from 'react-router-dom'
+import PhotoUploader from '../components/PhotoUploader'
+import PhotoResult from '../components/PhotoResult'
 
 export default function ResultPage() {
   return (
     <main className="page">
       <h1>사진으로 상황 확인</h1>
-      <p>준비 중입니다. 사진 없이도 증상을 직접 선택할 수 있어요.</p>
-      <Link className="action" to="/guide">📋 증상 직접 선택</Link>
+      <PhotoUploader />
+      <PhotoResult />
     </main>
   )
 }

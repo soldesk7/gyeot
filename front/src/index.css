@@ -24,11 +24,25 @@ body {
   margin: 0; /* 브라우저 기본 여백 제거 */
 }
 
-/* F-17 — 119 배너 (components/Banner119.jsx)
- * sticky: 스크롤을 내려도 화면 최상단에 계속 붙어 있다 */
+/* 앱을 배너와 페이지 두 행으로 나눈다.
+ * 페이지 영역만 스크롤되므로 배너는 높이를 측정하지 않아도 항상 위에 남는다. */
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.app-content {
+  grid-row: 2;
+  grid-column: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* F-17 — 119 배너 (components/Banner119.jsx) */
 .banner119 {
-  position: sticky;
-  top: 0;
   display: block;
   padding: 14px 16px;
   background: var(--danger);
@@ -36,6 +50,23 @@ body {
   font-weight: 700;
   text-align: center;
   text-decoration: none;
+}
+
+/* PC 신고 안내창은 배너가 아닌 두 번째 행만 덮는다. */
+.call119-report-guide {
+  grid-row: 2;
+  grid-column: 1;
+  z-index: 10;
+  display: grid;
+  place-items: start center;
+  padding: 16px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--text);
+}
+
+.call119-report-dialog {
+  margin-block: auto;
 }
 
 /* 페이지 레이아웃 — 모든 화면은 <main className="page">로 시작한다.

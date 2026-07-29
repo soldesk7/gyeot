@@ -7,6 +7,7 @@
 import { Component } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Banner119 from './components/Banner119.jsx'
+import { Call119Provider } from './components/Call119.jsx'
 import HomePage from './pages/HomePage.jsx'
 import ResultPage from './pages/ResultPage.jsx'
 import GuidePage from './pages/GuidePage.jsx'
@@ -40,20 +41,22 @@ class PageErrorBoundary extends Component {
 
 export default function App() {
   return (
-    <>
+    <Call119Provider>
       {/* 배너는 라우팅 바깥 = 어느 주소로 들어와도, 페이지가 오류여도 항상 그려진다 */}
       <Banner119 />
-      <PageErrorBoundary>
-        {/* 현재 주소와 path가 일치하는 <Route>의 element 하나만 화면에 그려진다 */}
-        <Routes>
-          <Route path="/" element={<HomePage />} />                      {/* 화면 A — 홈 */}
-          <Route path="/result" element={<ResultPage />} />              {/* 화면 B — 사진 인식 */}
-          <Route path="/guide" element={<GuidePage />} />                {/* 화면 C — 증상 선택 */}
-          <Route path="/guide/:category" element={<GuidePage />} />      {/* 화면 C — 개별 가이드 (:category는 변수) */}
-          <Route path="/map" element={<HospitalMapPage />} />            {/* 화면 D — 응급실 지도 */}
-          <Route path="/notice" element={<NoticePage />} />              {/* 화면 E — 이용 안내 */}
-        </Routes>
-      </PageErrorBoundary>
-    </>
+      <div className="app-content">
+        <PageErrorBoundary>
+          {/* 현재 주소와 path가 일치하는 <Route>의 element 하나만 화면에 그려진다 */}
+          <Routes>
+            <Route path="/" element={<HomePage />} />                      {/* 화면 A — 홈 */}
+            <Route path="/result" element={<ResultPage />} />              {/* 화면 B — 사진 인식 */}
+            <Route path="/guide" element={<GuidePage />} />                {/* 화면 C — 증상 선택 */}
+            <Route path="/guide/:category" element={<GuidePage />} />      {/* 화면 C — 개별 가이드 (:category는 변수) */}
+            <Route path="/map" element={<HospitalMapPage />} />            {/* 화면 D — 응급실 지도 */}
+            <Route path="/notice" element={<NoticePage />} />              {/* 화면 E — 이용 안내 */}
+          </Routes>
+        </PageErrorBoundary>
+      </div>
+    </Call119Provider>
   )
 }
