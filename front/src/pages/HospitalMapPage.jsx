@@ -65,20 +65,22 @@ export default function HospitalMapPage() {
         if (cancelled || !mapContainerRef.current) return
         const center = new kakao.maps.LatLng(position.lat, position.lng)
         const map = new kakao.maps.Map(mapContainerRef.current, { center, level: 3 })
-        new kakao.maps.Marker({ position: center, map })
+        new kakao.maps.CustomOverlay({ position: center, map, content: '<div style="width:20px;height:20px;border-radius:50%;background:#e53935;border:2px solid white;box-shadow:0 0 2px rgba(0,0,0,0.5);"></div>' })
+        
         //--------응급실 마커 찍기 시작--------
         return fetchHospitals(position.lat, position.lng).then((data) => {
           if (cancelled) return
           data.items.forEach((hospital) => {
             new kakao.maps.Marker({
               position: new kakao.maps.LatLng(hospital.lat, hospital.lng),
-              map,
+              map
             })
           })
           setUsedFallback(position.isFallback)
           setStatus('ready')
         })
         //--------응급실 마커 찍기 끝--------
+        
       })
       .catch(() => {
         if (!cancelled) setStatus('error')
