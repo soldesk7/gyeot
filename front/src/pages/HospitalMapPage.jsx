@@ -10,6 +10,7 @@
 //   - 병상 수 옆에는 항상 "OO시 OO분 기준"(응답의 asOf)을 함께 표기한다
 //   - 데이터 조회 실패 시 E-Gen(정부 공식 응급의료정보 서비스) 링크를 안내한다
 import { useEffect, useRef, useState } from 'react'
+import { fetchHospitals } from '../api/hospitals'
 
 const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
 
@@ -64,9 +65,22 @@ export default function HospitalMapPage() {
         if (cancelled || !mapContainerRef.current) return
         const center = new kakao.maps.LatLng(position.lat, position.lng)
         const map = new kakao.maps.Map(mapContainerRef.current, { center, level: 3 })
-        new kakao.maps.Marker({ position: center, map })
-        setUsedFallback(position.isFallback)
-        setStatus('ready')
+        new kakao.maps.CustomOverlay({ position: center, map, content: '<div style="width:20px;height:20px;border-radius:50%;background:#e53935;border:2px solid white;box-shadow:0 0 2px rgba(0,0,0,0.5);"></div>' })
+        
+        //--------응급실 마커 찍기 시작--------
+        return fetchHospitals(position.lat, position.lng).then((data) => {
+          if (cancelled) return
+          data.items.forEach((hospital) => {
+            new kakao.maps.Marker({
+              position: new kakao.maps.LatLng(hospital.lat, hospital.lng),
+              map
+            })
+          })
+          setUsedFallback(position.isFallback)
+          setStatus('ready')
+        })
+        //--------응급실 마커 찍기 끝--------
+        
       })
       .catch(() => {
         if (!cancelled) setStatus('error')
