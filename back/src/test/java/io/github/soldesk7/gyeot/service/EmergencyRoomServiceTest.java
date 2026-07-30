@@ -3,7 +3,9 @@ package io.github.soldesk7.gyeot.service;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
@@ -14,6 +16,7 @@ import static org.mockito.Mockito.when;
 import io.github.soldesk7.gyeot.client.EmergencyRoomClient;
 import io.github.soldesk7.gyeot.dto.EgytListInfoResponse;
 import io.github.soldesk7.gyeot.dto.EmergencyRoomsResponse;
+import io.github.soldesk7.gyeot.dto.EmrrmRltmUsefulSckbdInfoResponse;
 import io.github.soldesk7.gyeot.exception.HospitalDataUnavailableException;
 
 /**
@@ -26,6 +29,24 @@ import io.github.soldesk7.gyeot.exception.HospitalDataUnavailableException;
  * Client를 목으로 대체하므로 네트워크를 거치지 않는다.
  */
 class EmergencyRoomServiceTest {
+
+    /** 테스트가 도는 동안 병상 캐시가 만료되지 않도록 넉넉히 잡은 값. */
+    private static final long TTL_KEEP = 60_000;
+
+    /** 캐시가 만료된 상태로 테스트 하기 위한 값. */
+    private static final long TTL_EXPIRE = 0;
+
+    /**
+     * 실측 응답(서울 강남구)에서 가져온 병상 현황에 병상 값이 없는 기관을 하나 더한 것.
+     * 0은 만실, 음수는 정원 초과를 뜻한다.
+     */
+    private static final List<EmrrmRltmUsefulSckbdInfoResponse.Item> BEDS = List.of(
+            new EmrrmRltmUsefulSckbdInfoResponse.Item("A1100015", 0, "20260730164621"),
+            new EmrrmRltmUsefulSckbdInfoResponse.Item("A1100010", -16, "20260730164713"),
+            new EmrrmRltmUsefulSckbdInfoResponse.Item("A9999999", null, null));
+
+    private static final EmergencyRoomService.District 강남구 =
+            new EmergencyRoomService.District("서울특별시", "강남구");
 
     /** 좌표가 있는 최소 항목. 거리 계산 결과 자체는 이 테스트에서 중요하지 않다. */
     private static final List<EgytListInfoResponse.Item> ITEMS = List.of(
@@ -112,5 +133,58 @@ class EmergencyRoomServiceTest {
         // 이 경우 병상 조회 대상에서 제외한다.
         assertNull(EmergencyRoomService.parseDistrict(null));
         assertNull(EmergencyRoomService.parseDistrict("   "));
+    }
+
+    /**
+     * 병상 캐시가 동작하는지 검증한다.
+     *
+     * 캐시가 없어도 화면 결과는 같아서 눈으로는 구분되지 않는다. 
+     * 다만 요청마다 공공데이터를 부르게 되고 병상은 시군구 단위라 호출 수가 사용자 행동에 비례해 늘어난다. 
+     * 외부 호출 횟수로 확인한다.
+     */
+    @Test
+    void 같은_시군구를_다시_조회하면_외부_API를_부르지_않는다() {
+        EmergencyRoomClient client = mock(EmergencyRoomClient.class);
+        when(client.findBeds("서울특별시", "강남구")).thenReturn(BEDS);
+        EmergencyRoomService service = new EmergencyRoomService(client, TTL_KEEP);
+
+        assertEquals(0, service.bedsOf(강남구).get("A1100015"));    // 만실
+        assertEquals(-16, service.bedsOf(강남구).get("A1100010"));  // 16명 초과
+
+        // 병상 값이 없는 기관은 담지 않는다 — 매칭 단계에서 availableBeds가 null이 된다.
+        assertFalse(service.bedsOf(강남구).containsKey("A9999999"));
+
+        verify(client, times(1)).findBeds("서울특별시", "강남구");
+    }
+
+    @Test
+    void 캐시가_만료되면_다시_조회한다() {
+        EmergencyRoomClient client = mock(EmergencyRoomClient.class);
+        when(client.findBeds("서울특별시", "강남구")).thenReturn(BEDS);
+        EmergencyRoomService service = new EmergencyRoomService(client, TTL_EXPIRE);
+
+        service.bedsOf(강남구);
+        service.bedsOf(강남구);
+
+        verify(client, times(2)).findBeds("서울특별시", "강남구");
+    }
+
+    /**
+     * 캐시가 동작하지 않아도 API 응답 내용은 똑같이 나오므로 응답만 봐서는 캐시 여부를 구분할 수 없다. 
+     * 그래서 공공데이터 호출 횟수를 세는 방식으로 확인한다.
+     *
+     * 실패를 캐시에 담지 않으면 공공데이터 장애가 이어지는 동안 사용자 요청 수만큼 조회가 반복되어 일일 트래픽 사용량이 급격히 증가한다.
+     */
+    @Test
+    void 병상_조회에_실패하면_빈_결과를_돌려주고_다시_부르지_않는다() {
+        EmergencyRoomClient client = mock(EmergencyRoomClient.class);
+        when(client.findBeds("서울특별시", "강남구"))
+                .thenThrow(new HospitalDataUnavailableException(new RuntimeException("트래픽 한도 초과")));
+        EmergencyRoomService service = new EmergencyRoomService(client, TTL_KEEP);
+
+        assertTrue(service.bedsOf(강남구).isEmpty());
+        assertTrue(service.bedsOf(강남구).isEmpty());
+
+        verify(client, times(1)).findBeds("서울특별시", "강남구");
     }
 }
