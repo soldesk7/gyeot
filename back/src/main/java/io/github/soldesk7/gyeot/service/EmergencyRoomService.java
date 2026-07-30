@@ -3,10 +3,12 @@ package io.github.soldesk7.gyeot.service;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public class EmergencyRoomService {
     private static final Logger log = LoggerFactory.getLogger(EmergencyRoomService.class);
 
     /**
-     * 받아둔 전국 목록과 그것을 받아온 시각을 함께 담은 레코드.
+     * 받아둔 전국 응급실 목록과 그것을 받아온 시각을 함께 담은 레코드.
      *
      * 두 값을 한 객체로 묶는 이유: 목록과 시각을 별도로 관리하면 갱신 도중에 읽는 쪽이 "새 목록 + 옛 시각" 같은 어긋난 조합을
      * 볼 수 있다. 하나로 묶으면 참조 교체를 일회성으로 처리할 수 있어 일관성을 보장할 수 있다.
@@ -62,6 +64,23 @@ public class EmergencyRoomService {
     private static final int EARTH_RADIUS_M = 6_371_000;
 
     private final EmergencyRoomClient emergencyRoomClient;
+
+    /**
+     * 병상을 조회할 기준이 되는 기관 수.
+     *
+     * 상위 20곳 전부를 기준으로 삼으면 시군구가 6~10개로 퍼져 요청 하나에 그만큼 호출해야 한다.
+     * 상위 5곳이면 1~2개로 줄어든다(실측).
+     *
+     * 병상 응답은 시군구 단위로 오므로 그렇게 받아온 결과를 상위 20곳 전체와 대조하면 조회 대상으로
+     * 삼은 5곳보다 많이 채워진다(실측 평균 7곳). 다만 모두 채워지지는 않는다 — 응급실운영신고기관처럼
+     * 실시간 가용병상을 보고하지 않는 기관이 섞여 있어 조회한 시군구 안이어도 병상 정보가 없을 수 있다.
+     */
+    private static final int BEDS_LOOKUP_LIMIT = 5;
+
+    /** 거리 계산을 한 번만 하고 정렬까지 마치기 위해 기관과 거리를 함께 들고 다니는 임시 타입. */
+    private record Nearby(
+            EgytListInfoResponse.Item item, int distanceM) {
+    }
 
     /**
      * 한 시군구의 병상 현황과 그것을 받아온 시각.
@@ -119,21 +138,45 @@ public class EmergencyRoomService {
             snapshot = current;
         }
 
-        List<EmergencyRoom> items = current.items().stream()
-                /* 
-                공공데이터에 좌표가 비어 있는 기관이 섞여 있다. 
-                지도에 표시할 수 없고 거리 계산도 불가능하므로 제외한다. 
-                (0.0으로 채우면 위경도 (0,0) = 아프리카 앞바다로 계산돼 정렬이 망가지므로 기본값 대체는 배제한다) 
+        List<Nearby> nearest = current.items().stream()
+                /*
+                공공데이터에 좌표가 비어 있는 기관이 섞여 있다.
+                지도에 표시할 수 없고 거리 계산도 불가능하므로 제외한다.
+                (0.0으로 채우면 위경도 (0,0) = 아프리카 앞바다로 계산돼 정렬이 망가지므로 기본값 대체는 배제한다)
                  */
                 .filter(item -> item.wgs84Lat() != null && item.wgs84Lon() != null)
-                .map(item -> toEmergencyRoom(item, lat, lng))
-                .sorted(Comparator.comparingInt(EmergencyRoom::distanceM))
+                .map(item -> new Nearby(item, distanceMeters(lat, lng, item.wgs84Lat(), item.wgs84Lon())))
+                .sorted(Comparator.comparingInt(Nearby::distanceM))
                 .limit(NEARBY_LIMIT)
+                .toList();
+
+        Map<String, Integer> beds = bedsFor(nearest);
+
+        List<EmergencyRoom> items = nearest.stream()
+                .map(n -> toEmergencyRoom(n.item(), n.distanceM(), beds.get(n.item().hpid())))
                 .toList();
 
         // asOf: 응급실 목록을 공공데이터에서 받아온 시각. 요청 시각이 아니다.
         // 프론트엔드에서 "이 정보가 얼마나 오래된 정보인지"를 알아야 하기 때문
         return new EmergencyRoomsResponse(current.fetchedAt(), items);
+    }
+
+    /**
+     * 가까운 기관들이 속한 시군구의 병상 현황을 모아 기관ID별 표로 돌려준다.
+     *
+     * 병상 조회는 요청을 처리하는 도중에 일어나므로 사용자가 그만큼 기다린다. 
+     * 실측 응답 시간이 0.04~5.16초로 편차가 커 부르는 시군구 수를 줄임으로서 평균 응답 시간을 줄인다.
+     * 시군구를 순서대로 부르므로 2개면 최악의 경우 두 번 기다린다 — 대기가 문제가 되면 동시 호출로 바꿀 수도 있다.
+     */
+    private Map<String, Integer> bedsFor(List<Nearby> nearest) {
+        Map<String, Integer> merged = new HashMap<>();
+        nearest.stream()
+                .limit(BEDS_LOOKUP_LIMIT)
+                .map(n -> parseDistrict(n.item().dutyAddr()))
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(district -> merged.putAll(bedsOf(district)));
+        return merged;
     }
 
     /** 공공데이터에서 전국 응급실 목록을 새로 받아 스냅샷으로 만든다. 실패하면 예외가 그대로 올라간다. */
@@ -145,13 +188,13 @@ public class EmergencyRoomService {
     /**
      * 공공데이터 항목 하나를 우리 계약 DTO로 변환한다.
      */
-    private static EmergencyRoom toEmergencyRoom(EgytListInfoResponse.Item item, double lat, double lng) {
+    private static EmergencyRoom toEmergencyRoom(EgytListInfoResponse.Item item, int distanceM, Integer availableBeds) {
         return new EmergencyRoom(
                 item.dutyName(),
                 item.wgs84Lat(),
                 item.wgs84Lon(),
-                null, // 가용병상: 다른 오퍼레이션(주소 기준)에 있어 2단계 조합이 필요하다. 캐싱과 함께 SP3에서.
-                distanceMeters(lat, lng, item.wgs84Lat(), item.wgs84Lon())
+                availableBeds, // 조회 대상 시군구 밖이거나 병상 정보가 없으면 null
+                distanceM
         );
     }
 
