@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.genai.Client;
 import com.google.genai.types.HttpOptions;
+import com.google.genai.types.HttpRetryOptions;
 
 @Configuration
 public class GeminiClientConfig {
@@ -26,7 +27,11 @@ public class GeminiClientConfig {
         ) {
         return Client.builder()
                 .apiKey(apiKey)
-                .httpOptions(HttpOptions.builder().timeout(timeoutMs).build())
+                .httpOptions(
+                    HttpOptions.builder()
+                    .timeout(timeoutMs)
+                    .retryOptions(HttpRetryOptions.builder().attempts(1).build())
+                    .build())
                 .build();
     }
 }
