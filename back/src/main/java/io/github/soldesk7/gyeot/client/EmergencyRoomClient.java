@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import io.github.soldesk7.gyeot.dto.EgytListInfoResponse;
+import io.github.soldesk7.gyeot.dto.EmrrmRltmUsefulSckbdInfoResponse;
 import io.github.soldesk7.gyeot.exception.HospitalDataUnavailableException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.dataformat.xml.XmlMapper;
@@ -30,6 +31,17 @@ public class EmergencyRoomClient {
      * 조회(Lcinfo)와 달리 진료시간 필터가 없어 밤에도 결과가 유지된다.
      */
     private static final String PATH_LIST = "/getEgytListInfoInqire";
+
+    /**
+     * 응급실 실시간 가용병상정보 조회 — 주소(시도·시군구)가 필수라 좌표로는 부를 수 없다.
+     * 목록 조회로 받은 기관 주소에서 시도·시군구를 잘라 호출하고 결과는 hpid로 목록과 매칭한다.
+     */
+    private static final String PATH_BEDS = "/getEmrrmRltmUsefulSckbdInfoInqire";
+
+    /**
+     * 시군구 하나에 속한 응급의료기관 수. 실측 기준 최대 7곳이었으며 여유를 두고 100으로 잡는다.
+     */
+    private static final int NUM_OF_ROWS_BEDS = 100;
 
     /**
      * 전국 응급의료기관을 한 번에 받기 위한 값. 실측 기준 534곳이며, 기관 수가 늘어도 여유가 있도록 1000으로 둔다. 이
@@ -110,6 +122,43 @@ public class EmergencyRoomClient {
 
             // 조회 결과가 0건이면 XML에 <item>이 없어 items가 null이 된다. 여기서 막지 않으면 호출부에서 NPE가 난다.
             List<EgytListInfoResponse.Item> items = response.body().items();
+            return items == null ? List.of() : items;
+        } catch (RestClientException | JacksonException e) {
+            throw new HospitalDataUnavailableException(e);
+        }
+    }
+
+    /**
+     * 한 시군구의 응급실 실시간 가용병상 정보를 조회한다.
+     *
+     * stage2(시군구)는 공공데이터 문서상 필수로 표기돼 있으나 빈 값도 정상 동작한다. 
+     * 세종특별자치시처럼 시군구 단계가 없는 주소에서는 빈 값을 넘겨 시도 전체를 받는다.
+     *
+     * @param stage1 시도. 기관 주소의 첫 토큰을 그대로 쓴다(예: 서울특별시, 전남광주통합특별시)
+     * @param stage2 시군구. 없으면 빈 문자열
+     */
+    public List<EmrrmRltmUsefulSckbdInfoResponse.Item> findBeds(String stage1, String stage2) {
+        try {
+            String xml = restClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                    .path(PATH_BEDS)
+                    .queryParam("serviceKey", serviceKey)
+                    .queryParam("STAGE1", stage1)
+                    .queryParam("STAGE2", stage2)
+                    .queryParam("pageNo", 1)
+                    .queryParam("numOfRows", NUM_OF_ROWS_BEDS)
+                    .build())
+                    .retrieve()
+                    .body(String.class);
+
+            EmrrmRltmUsefulSckbdInfoResponse response =
+                    xmlMapper.readValue(xml, EmrrmRltmUsefulSckbdInfoResponse.class);
+            if (response.body() == null) {
+                throw new HospitalDataUnavailableException(new IllegalStateException("응답 구조가 올바르지 않음"));
+            }
+
+            // 해당 시군구에 응급의료기관이 없으면 XML에 <item>이 없어 items가 null이 된다.
+            List<EmrrmRltmUsefulSckbdInfoResponse.Item> items = response.body().items();
             return items == null ? List.of() : items;
         } catch (RestClientException | JacksonException e) {
             throw new HospitalDataUnavailableException(e);
