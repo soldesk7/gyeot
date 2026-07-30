@@ -158,4 +158,45 @@ public class EmergencyRoomService {
             log.warn("응급실 목록 갱신 실패 — 기존 목록을 유지한다", e);
         }
     }
+
+    /**
+     * 병상 조회에 넘길 행정구역. 목록의 기관 주소에서 잘라낸다.
+     *
+     * 공공데이터의 병상 오퍼레이션이 시도(STAGE1)·시군구(STAGE2)를 파라미터로 받으므로 이 두 값이 곧 어느 시군구의 병상을 받아왔는지를 가리키는 캐시 키가 된다.
+     * 레코드는 equals·hashCode가 자동으로 만들어져 Map의 키로 그대로 쓸 수 있다.
+     */
+    record District(
+            String sido, 
+            String sigungu
+            ) {
+    }
+
+    /**
+     * 기관 주소에서 시도·시군구를 잘라낸다.
+     *
+     * 주소는 "울산광역시 남구 남산로354번길 26 (신정동)"처럼 공백으로 나뉜 문자열로 온다.
+     * 첫 토큰이 시도, 둘째 토큰이 시군구다.
+     *
+     * 둘째 토큰이 시·군·구로 끝나지 않으면 시군구 단계가 없는 주소다. 
+     * 세종특별자치시가 여기 해당하며 ("세종특별자치시 보듬7로 20") 이때는 시군구를 빈 값으로 두어 시도 전체를 조회한다.
+     * 공공데이터 문서에는 시군구가 필수로 표기돼 있으나 빈 값도 정상 동작하는 것을 실측으로 확인했다.
+     *
+     * "경기도 성남시 분당구"처럼 세 단계인 주소는 둘째 토큰인 "성남시"로 잡힌다. 
+     * 분당구보다 넓은 범위로 조회되므로 분당구 기관이 결과에 포함된다 — 누락이 생기지 않는 방향이다.
+     *
+     * @return 주소가 비어 있으면 null. 조회 대상에서 제외한다.
+     */
+    static District parseDistrict(String dutyAddr) {
+        if (dutyAddr == null || dutyAddr.isBlank()) {
+            return null;
+        }
+        String[] tokens = dutyAddr.trim().split("\\s+");
+        String sigungu = (tokens.length > 1 && isSigungu(tokens[1])) ? tokens[1] : "";
+        return new District(tokens[0], sigungu);
+    }
+
+    /** 시군구 이름인지 판별한다. 도로명·법정동은 로·길·동 등으로 끝나 여기서 걸러진다. */
+    private static boolean isSigungu(String token) {
+        return token.endsWith("시") || token.endsWith("군") || token.endsWith("구");
+    }
 }
