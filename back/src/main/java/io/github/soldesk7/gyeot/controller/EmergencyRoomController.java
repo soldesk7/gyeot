@@ -27,9 +27,9 @@ public class EmergencyRoomController {
     /**
      * 좌표 기준 인근 응급실 목록을 반환
      *
-     * lat·lng는 필수다. @RequestParam은 기본값이 required = true이므로 누락 시 스프링이 400을 반환한다.
-     * 다만 응답 본문은 아직 스프링 기본 형식이라, 계약이 요구하는 { "error": "MISSING_LOCATION",
-     * "message": "..." } 형태로 바꾸는 일은 이슈 #19에서 한다.
+     * lat·lng는 필수다. 
+     * @RequestParam은 기본값이 required = true이므로 누락 시 스프링이 MissingServletRequestParameterException을 던진다.
+     * 이를 GlobalExceptionHandler가 400 MISSING_LOCATION 계약 응답으로 교체한다.
      *
      * 좌표는 저장하지 않는다 — 조회 요청에만 사용한다.(N-03).
      */

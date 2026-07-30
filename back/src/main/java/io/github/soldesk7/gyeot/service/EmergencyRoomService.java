@@ -43,8 +43,8 @@ public class EmergencyRoomService {
      * 처리 순서: 전국 목록을 받아 → 각 기관까지의 거리를 계산하고 → 가까운 순으로 정렬한 뒤 → 상위 20곳만 남긴다. 
      * 공공데이터가 거리를 주지 않고 기관명 오름차순 정렬해 주기 때문에 이 과정이 필수
      *
-     * 외부 호출이 실패하면(타임아웃·서버 오류) 예외가 그대로 올라간다. 
-     * 이를 502 HOSPITAL_DATA_UNAVAILABLE 같은 계약 응답으로 바꾸는 일은 이슈 #19에서 두 API(F-09·F-05)에 일관되게 적용할 예정
+     * 외부 호출이 실패하면(타임아웃·서버 오류·응답 구조 이상) Client가 HospitalDataUnavailableException으로 바꿔 던지고
+     * GlobalExceptionHandler가 502 HOSPITAL_DATA_UNAVAILABLE로 응답한다.
      *
      * @param lat 위도(WGS84)
      * @param lng 경도(WGS84)
