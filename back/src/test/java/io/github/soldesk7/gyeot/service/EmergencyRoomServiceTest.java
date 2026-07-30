@@ -3,6 +3,8 @@ package io.github.soldesk7.gyeot.service;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -60,5 +62,55 @@ class EmergencyRoomServiceTest {
 
         assertEquals(before.asOf(), after.asOf());   // 이전 스냅샷이 그대로 남았다
         assertEquals(1, after.items().size());
+    }
+    
+    /**
+     * 주소 문자열에서 병상 조회에 넘길 시도·시군구를 잘라내는 규칙을 고정한다.
+     *
+     * 이 규칙이 어긋나면 병상 조회가 조용히 0건을 돌려주고 화면에는 "병상 정보 없음"으로만 보인다.
+     * 오류가 나지 않아 눈치채기 어려우므로 실제 응답에서 가져온 주소 형태별로 결과를 못박아 둔다.
+     */
+    @Test
+    void 주소에서_시도와_시군구를_잘라낸다() {
+        // 가장 흔한 형태 — 시도 + 시군구
+        EmergencyRoomService.District basic =
+                EmergencyRoomService.parseDistrict("울산광역시 남구 남산로354번길 26 (신정동)");
+        assertEquals("울산광역시", basic.sido());
+        assertEquals("남구", basic.sigungu());
+
+        // 군 단위도 같은 규칙으로 잡힌다
+        EmergencyRoomService.District county =
+                EmergencyRoomService.parseDistrict("전남광주통합특별시 화순군 화순읍 서양로 322");
+        assertEquals("전남광주통합특별시", county.sido());
+        assertEquals("화순군", county.sigungu());
+    }
+
+    @Test
+    void 세_단계_주소는_시까지만_잘라낸다() {
+        // "성남시 분당구"처럼 세 단계인 주소는 둘째 토큰인 시에서 멈춘다.
+        // 분당구보다 넓은 범위로 조회되므로 분당구 기관이 결과에 포함된다 — 누락이 생기지 않는 방향이다.
+        EmergencyRoomService.District d =
+                EmergencyRoomService.parseDistrict("경기도 성남시 분당구 야탑로 59");
+        assertEquals("경기도", d.sido());
+        assertEquals("성남시", d.sigungu());
+    }
+
+    @Test
+    void 시군구_단계가_없으면_시군구를_비운다() {
+        // 세종특별자치시는 시군구 단계가 없어 둘째 토큰이 도로명이다.
+        // 시군구를 빈 값으로 두면 시도 전체가 조회된다(공공데이터 문서에는 필수로 표기돼 있으나 실제로는 빈 값도 동작).
+        // 도로명을 그대로 넘기면 그 도로의 기관만 나와 나머지가 누락된다.
+        EmergencyRoomService.District d =
+                EmergencyRoomService.parseDistrict("세종특별자치시 보듬7로 20, 세종충남대학교병원 (도담동)");
+        assertEquals("세종특별자치시", d.sido());
+        assertEquals("", d.sigungu());
+    }
+
+    @Test
+    void 주소가_없으면_null을_반환한다() {
+        // 실측 534건에는 모두 주소가 있었지만, 좌표가 비어 있는 기관이 섞여 있던 전례가 있어 방어한다.
+        // 이 경우 병상 조회 대상에서 제외한다.
+        assertNull(EmergencyRoomService.parseDistrict(null));
+        assertNull(EmergencyRoomService.parseDistrict("   "));
     }
 }
