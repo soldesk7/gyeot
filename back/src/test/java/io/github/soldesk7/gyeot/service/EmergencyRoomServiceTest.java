@@ -35,7 +35,7 @@ class EmergencyRoomServiceTest {
     void 두_번째_조회는_외부_API를_다시_부르지_않는다() {
         EmergencyRoomClient client = mock(EmergencyRoomClient.class);
         when(client.findAll()).thenReturn(ITEMS);
-        EmergencyRoomService service = new EmergencyRoomService(client);
+        EmergencyRoomService service = new EmergencyRoomService(client, 180000);
 
         EmergencyRoomsResponse first = service.findNearby(37.5, 127.0);
         EmergencyRoomsResponse second = service.findNearby(35.2, 129.2);  // 좌표를 바꿔도 목록은 재사용
@@ -50,7 +50,7 @@ class EmergencyRoomServiceTest {
     void 갱신에_실패해도_기존_목록으로_응답한다() {
         EmergencyRoomClient client = mock(EmergencyRoomClient.class);
         when(client.findAll()).thenReturn(ITEMS);
-        EmergencyRoomService service = new EmergencyRoomService(client);
+        EmergencyRoomService service = new EmergencyRoomService(client, 1000);
 
         EmergencyRoomsResponse before = service.findNearby(37.5, 127.0);
 

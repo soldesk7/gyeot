@@ -1,10 +1,16 @@
 package io.github.soldesk7.gyeot.service;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +18,7 @@ import io.github.soldesk7.gyeot.client.EmergencyRoomClient;
 import io.github.soldesk7.gyeot.dto.EgytListInfoResponse;
 import io.github.soldesk7.gyeot.dto.EmergencyRoom;
 import io.github.soldesk7.gyeot.dto.EmergencyRoomsResponse;
+import io.github.soldesk7.gyeot.dto.EmrrmRltmUsefulSckbdInfoResponse;
 import io.github.soldesk7.gyeot.exception.HospitalDataUnavailableException;
 
 /**
@@ -56,8 +63,37 @@ public class EmergencyRoomService {
 
     private final EmergencyRoomClient emergencyRoomClient;
 
-    public EmergencyRoomService(EmergencyRoomClient emergencyRoomClient) {
+    /**
+     * 한 시군구의 병상 현황과 그것을 받아온 시각.
+     *
+     * 기관ID(hpid)를 키로 사용하여 가용병상 수를 담는다. 목록과 짝지을 때 기관마다 목록을 훑지 않도록 받아온 시점에 Map으로
+     * 바꿔 둔다.
+     */
+    private record BedSnapshot(
+            Instant fetchedAt,
+            Map<String, Integer> bedsByHpid
+            ) {
+
+    }
+
+    /**
+     * 시군구별 병상 캐시.
+     *
+     * 목록 캐시와 달리 전국을 미리 받아둘 수 없다. — 병상 오퍼레이션이 시군구 단위여서 전국을 채우려면 220개 시군구를 매번
+     * 호출해야 한다. 그래서 조회된 시군구만 요청 시점에 채운다.
+     *
+     * 서로 다른 요청이 동시에 각자의 시군구를 채울 수 있어 ConcurrentHashMap을 사용한다. (멀티 스레드 환경에서 높은 동시 처리 성능)
+     */
+    private final Map<District, BedSnapshot> bedCache = new ConcurrentHashMap<>();
+
+    private final long bedsTtlMs;
+
+    public EmergencyRoomService(
+            EmergencyRoomClient emergencyRoomClient,
+            @Value("${gyeot.emergency-room.beds-ttl-ms}") long bedsTtlMs
+        ) {
         this.emergencyRoomClient = emergencyRoomClient;
+        this.bedsTtlMs = bedsTtlMs;
     }
 
     /**
@@ -143,8 +179,7 @@ public class EmergencyRoomService {
      * 사용자 요청이 들어온 뒤에 조회하면 그 사용자가 응답을 기다려야 한다.(실측결과 약 7초 소요).
      * 미리 받아두면 서버 측 메모리에서 바로 조회 가능하다.
      *
-     * 갱신에 실패해도 기존 스냅샷을 지우지 않는다. 
-     * 목록이 비면 지도에 응급실 목록이 아예 출력되지 않는디.
+     * 갱신에 실패해도 기존 스냅샷을 지우지 않는다. 목록이 비면 지도에 응급실 목록이 아예 출력되지 않는다.
      * 몇 시간 지난 목록이라도 빈 화면보다 낫다. (응급실 위치는 자주 바뀌지 않는다)
      *
      * fixedDelay는 첫 실행이 기동 직후에 일어나고 이후에는 직전 실행이 끝난 시점부터 주기를 잰다.
@@ -162,27 +197,28 @@ public class EmergencyRoomService {
     /**
      * 병상 조회에 넘길 행정구역. 목록의 기관 주소에서 잘라낸다.
      *
-     * 공공데이터의 병상 오퍼레이션이 시도(STAGE1)·시군구(STAGE2)를 파라미터로 받으므로 이 두 값이 곧 어느 시군구의 병상을 받아왔는지를 가리키는 캐시 키가 된다.
-     * 레코드는 equals·hashCode가 자동으로 만들어져 Map의 키로 그대로 쓸 수 있다.
+     * 공공데이터의 병상 오퍼레이션이 시도(STAGE1)·시군구(STAGE2)를 파라미터로 받으므로 이 두 값이 곧 어느 시군구의 병상을
+     * 받아왔는지를 가리키는 캐시 키가 된다. 레코드는 equals·hashCode가 자동으로 만들어져 Map의 키로 그대로 쓸 수 있다.
      */
     record District(
-            String sido, 
+            String sido,
             String sigungu
             ) {
+
     }
 
     /**
      * 기관 주소에서 시도·시군구를 잘라낸다.
      *
-     * 주소는 "울산광역시 남구 남산로354번길 26 (신정동)"처럼 공백으로 나뉜 문자열로 온다.
-     * 첫 토큰이 시도, 둘째 토큰이 시군구다.
+     * 주소는 "울산광역시 남구 남산로354번길 26 (신정동)"처럼 공백으로 나뉜 문자열로 온다. 첫 토큰이 시도, 둘째 토큰이
+     * 시군구다.
      *
-     * 둘째 토큰이 시·군·구로 끝나지 않으면 시군구 단계가 없는 주소다. 
-     * 세종특별자치시가 여기 해당하며 ("세종특별자치시 보듬7로 20") 이때는 시군구를 빈 값으로 두어 시도 전체를 조회한다.
-     * 공공데이터 문서에는 시군구가 필수로 표기돼 있으나 빈 값도 정상 동작하는 것을 실측으로 확인했다.
+     * 둘째 토큰이 시·군·구로 끝나지 않으면 시군구 단계가 없는 주소다. 세종특별자치시가 여기 해당하며 ("세종특별자치시 보듬7로
+     * 20") 이때는 시군구를 빈 값으로 두어 시도 전체를 조회한다. 공공데이터 문서에는 시군구가 필수로 표기돼 있으나 빈 값도 정상
+     * 동작하는 것을 실측으로 확인했다.
      *
-     * "경기도 성남시 분당구"처럼 세 단계인 주소는 둘째 토큰인 "성남시"로 잡힌다. 
-     * 분당구보다 넓은 범위로 조회되므로 분당구 기관이 결과에 포함된다 — 누락이 생기지 않는 방향이다.
+     * "경기도 성남시 분당구"처럼 세 단계인 주소는 둘째 토큰인 "성남시"로 잡힌다. 분당구보다 넓은 범위로 조회되므로 분당구 기관이
+     * 결과에 포함된다 — 누락이 생기지 않는 방향이다.
      *
      * @return 주소가 비어 있으면 null. 조회 대상에서 제외한다.
      */
@@ -195,8 +231,42 @@ public class EmergencyRoomService {
         return new District(tokens[0], sigungu);
     }
 
-    /** 시군구 이름인지 판별한다. 도로명·법정동은 로·길·동 등으로 끝나 여기서 걸러진다. */
+    /**
+     * 시군구 이름인지 판별한다. 도로명·법정동은 로·길·동 등으로 끝나 여기서 걸러진다.
+     */
     private static boolean isSigungu(String token) {
         return token.endsWith("시") || token.endsWith("군") || token.endsWith("구");
+    }
+
+    /**
+     * 한 시군구의 병상 현황을 돌려준다. 캐시가 유효하면 그대로 사용하고 아니면 새로 받아온다.
+     *
+     * 조회에 실패해도 예외를 올리지 않고 빈 결과를 돌려준다. 병상은 부가 정보라 이것 때문에 응급실 목록 전체가 실패하면 안 된다. -
+     * 위치를 아는 것이 병상 수를 아는 것보다 우선이다.
+     */
+    Map<String, Integer> bedsOf(District district) {
+        BedSnapshot cached = bedCache.get(district);
+        if (cached != null && Duration.between(cached.fetchedAt(), Instant.now()).toMillis() < bedsTtlMs) {
+            return cached.bedsByHpid();
+        }
+
+        try {
+            // hvec이 비어 있는 기관은 담지 않는다. Collectors.toMap은 값이 null이면 예외를 던지고,
+            // 담지 않으면 매칭 단계에서 자연히 availableBeds가 null이 되어 의미도 맞는다.
+            Map<String, Integer> beds = emergencyRoomClient.findBeds(district.sido(), district.sigungu()).stream()
+                    .filter(item -> item.hpid() != null && item.hvec() != null)
+                    .collect(Collectors.toMap(
+                            EmrrmRltmUsefulSckbdInfoResponse.Item::hpid,
+                            EmrrmRltmUsefulSckbdInfoResponse.Item::hvec,
+                            (first, second) -> first));   // 같은 기관이 중복으로 오면 먼저 온 것을 쓴다
+            bedCache.put(district, new BedSnapshot(Instant.now(), beds));
+            return beds;
+        } catch (HospitalDataUnavailableException e) {
+            log.warn("병상 조회 실패 — 병상 없이 응답한다 ({} {})", district.sido(), district.sigungu(), e);
+            // 실패도 캐시에 담는다. 담지 않으면 공공데이터가 불안정한 동안 요청마다 다시 호출해
+            // 트래픽만 소비한다. TTL이 지나면 자연히 다시 시도한다.
+            bedCache.put(district, new BedSnapshot(Instant.now(), Map.of()));
+            return Map.of();
+        }
     }
 }
