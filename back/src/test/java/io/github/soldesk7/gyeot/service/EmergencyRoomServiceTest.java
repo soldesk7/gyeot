@@ -27,7 +27,7 @@ class EmergencyRoomServiceTest {
 
     /** 좌표가 있는 최소 항목. 거리 계산 결과 자체는 이 테스트에서 중요하지 않다. */
     private static final List<EgytListInfoResponse.Item> ITEMS = List.of(
-            new EgytListInfoResponse.Item("삼성서울병원", 37.4881326, 127.0851566));
+            new EgytListInfoResponse.Item("삼성서울병원", "서울특별시 강남구 일원로 81 (일원동)", "A0000028", 37.4881326, 127.0851566));
 
     @Test
     void 두_번째_조회는_외부_API를_다시_부르지_않는다() {
