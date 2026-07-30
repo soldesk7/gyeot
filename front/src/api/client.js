@@ -16,7 +16,7 @@
 
 // Vite는 VITE_ 접두사가 붙은 환경변수만 프론트 코드에 노출한다 (.env 참고).
 // ?? 는 "왼쪽이 없으면(null/undefined) 오른쪽을 쓴다"는 뜻 — .env가 없어도 로컬 기본값으로 동작.
-const BASE = import.meta.env.VITE_BFF_BASE_URL ?? 'http://localhost:8080'
+const BASE = import.meta.env.VITE_BFF_BASE_URL ?? ''
 
 // Error를 상속해서 code(분기용)·status(HTTP 상태)를 추가로 실어 나른다.
 export class ApiError extends Error {
