@@ -4,30 +4,32 @@
 // 인식 API는 F1의 api/recognitions.js가 준비되기 전이라 setTimeout으로 흉내만 낸다.
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import UploadNotice from './UploadNotice'
+import { recognize } from '../api/recognitions'
 
+export default function PhotoUploader({ onResult }) {
+  const [agreed, setAgreed] = useState(false)
+  const [photo, setPhoto] = useState(null)
 
-export default function PhotoUploader() {
-const [agreed, setAgreed] = useState(false)
-    const [photo, setPhoto] = useState(null)
-
-     const handleSelectPhoto = (e) => {
+  const handleSelectPhoto = (e) => {
     const file = e.target.files[0]
     setPhoto(file)
-    // TODO(F1): api/recognitions.js 준비되면 여기서 실제 API 호출로 교체
-    setTimeout(() => {
-      // 지금은 PhotoResult가 비어있어서 완료 후 처리할 로직 없음
-    }, 2000)
+    recognize(file)
+      .then((result) => {
+        onResult?.(result)
+      })
+      .catch((err) => {
+        console.error('인식 실패:', err)
+      })
   }
+
+
 
   if (!agreed) {
     return (
         <>
-      <div className="card">
-        {/* TODO(F4): 이슈 #24 머지되면 실제 고지 팝업 컴포넌트로 교체 */}
-        <p>[자리표시자] 이용 목적: 응급 상황 판단 지원</p>
-        <p>[자리표시자] 사진은 저장하지 않고 인식 즉시 폐기됩니다</p>
-        <button className="action" onClick={() => setAgreed(true)}>동의</button>
-      </div>
+      <UploadNotice onAgree={() => setAgreed(true)} />
+
        <Link className="action" to="/guide">📋 증상 직접 선택</Link>
       </>
     )
@@ -56,4 +58,3 @@ const [agreed, setAgreed] = useState(false)
     </>
   )
 }
-

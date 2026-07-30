@@ -3,10 +3,12 @@
 // - 사용자가 동의하면 부모 컴포넌트에서 전달받은 onAgree 함수 실행
 // - 처리 방침 페이지 이동 링크 제공
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./UploadNotice.css";
 
 export default function UploadNotice({ onAgree }) {
+    const navigate = useNavigate();
+
     return  (
         <section className="upload-notice">
             <div className="upload-notice-box">
@@ -35,7 +37,8 @@ export default function UploadNotice({ onAgree }) {
                         동의하고 계속
                     </button>
 
-                    <button type="button">
+                    <button type="button"
+                    onClick={() => navigate("/")}>
                         취소
                     </button>
                 </div>
