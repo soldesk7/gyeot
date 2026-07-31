@@ -14,7 +14,7 @@ import PhotoResult from "../components/PhotoResult";
  * 사진 인식 API가 반환하는 결과입니다.
  *
  * @typedef {Object} RecognitionResult
- * @property {"burn"|"bleeding"|"trauma"|"unconscious"} category 추정된 상황 범주
+ * @property {"burn"| "bleeding" | "unconscious" | "unknown"} category 추정된 상황 범주
  * @property {number} confidence BFF가 판단한 신뢰도
  * @property {string} visibleSigns 사진에서 관찰된 특징
  */
@@ -24,7 +24,7 @@ export default function ResultPage() {
   const [result, setResult] = useState(null);
 
   return (
-    <div className="page">
+    <main className="page">
       <h1>사진으로 상황 확인</h1>
 
       {result ? (
@@ -32,6 +32,6 @@ export default function ResultPage() {
       ) : (
         <PhotoUploader onResult={setResult} />
       )}
-    </div>
+    </main>
   );
 }
