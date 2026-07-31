@@ -6,9 +6,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,8 +72,9 @@ public class EmergencyRoomService {
      * 상위 5곳이면 1~2개로 줄어든다(실측).
      *
      * 병상 응답은 시군구 단위로 오므로 그렇게 받아온 결과를 상위 20곳 전체와 대조하면 조회 대상으로
-     * 삼은 5곳보다 많이 채워진다(실측 평균 7곳). 다만 모두 채워지지는 않는다 — 응급실운영신고기관처럼
-     * 실시간 가용병상을 보고하지 않는 기관이 섞여 있어 조회한 시군구 안이어도 병상 정보가 없을 수 있다.
+     * 삼은 5곳보다 많이 채워진다(실측 평균 7곳). 다만 모두 채워지지는 않는다 — 
+     * 응급실운영신고기관 중 상당수가 실시간 가용병상을 보고하지 않아 조회한 시군구 안이어도 병상 정보가 없을 수 있다
+     * (실측 45곳 기준 상위 3개 등급은 전부 보고).
      */
     private static final int BEDS_LOOKUP_LIMIT = 5;
 
