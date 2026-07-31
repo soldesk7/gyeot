@@ -98,13 +98,15 @@ public record EgytListInfoResponse(Header header, Body body) {
     }
 
     /**
-     * 응급의료기관 1곳. 응답에는 주소·응급실전화(dutyTel3)·기관등급(dutyEmclsName)·기관ID 등도 오지만 우리 계약(EmergencyRoom)에 필요한 3개만 받는다. 
+     * 응급의료기관 1곳. 응답에는 주소·응급실전화(dutyTel3)·기관등급(dutyEmclsName)·기관ID 등도 오지만 우리 계약(EmergencyRoom)에 필요한 5개만 받는다. 
      * 선언하지 않은 나머지는 위의 @JsonIgnoreProperties 덕분에 그냥 버려진다. 
      * (dutyTel3·dutyEmclsName은 화면에 유용할 수 있어 향후 계약 확장 시 후보다)
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Item(
             String dutyName, // 기관명 -> EmergencyRoom.name
+            String dutyAddr, // 주소 -> 앞부분을 잘라 병상 조회의 STAGE1(시도)·STAGE2(시군구)로 쓴다
+            String hpid,     // 기관ID -> 병상 응답과 짝지을 때 쓰는 키 (기관명은 동명 기관이 있어 쓸 수 없다)
             Double  wgs84Lat, // 위도  -> EmergencyRoom.lat (일부 기관은 좌표가 비어 있어 래퍼 타입 사용 (null 허용))
             Double  wgs84Lon // 경도   -> EmergencyRoom.lng
             ) {
