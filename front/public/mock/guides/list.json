@@ -1,0 +1,17 @@
+[
+    {
+        "category": "burn",
+        "title": "화상",
+        "summary": "화상 응급처치 안내"
+    },
+    {
+        "category": "bleeding",
+        "title": "출혈·외상",
+        "summary": "출혈 및 외상 응급처치 안내"
+    },
+    {
+        "category": "unconscious",
+        "title": "의식저하",
+        "summary": "의식저하 응급처치 안내"
+    }
+]
