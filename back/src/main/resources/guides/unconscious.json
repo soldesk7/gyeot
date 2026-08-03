@@ -1,0 +1,18 @@
+{
+  "category": "unconscious",
+  "title": "의식저하",
+  "sections": [
+    {
+      "title": "임시 구획 — F5 자료로 교체 예정",
+      "steps": [
+        "임시 단계 1 — 공식 출처 문장으로 교체합니다.",
+        "임시 단계 2 — 공식 출처 문장으로 교체합니다."
+      ],
+      "source": {
+        "name": "임시 출처",
+        "url": "https://example.invalid/temporary",
+        "license": "임시"
+      }
+    }
+  ]
+}
