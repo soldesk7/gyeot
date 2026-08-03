@@ -10,6 +10,7 @@ import { useState } from "react";
 import PhotoUploader from "../components/PhotoUploader";
 import PhotoResult from "../components/PhotoResult";
 
+// TODO: lowConfidence가 true일 때 추정 후보를 보여주지 않고 수동 선택 화면으로 전환한다
 /**
  * 사진 인식 API가 반환하는 결과입니다.
  *
