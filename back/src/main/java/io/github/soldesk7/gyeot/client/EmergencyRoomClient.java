@@ -25,7 +25,7 @@ import tools.jackson.dataformat.xml.XmlMapper;
 @Component
 public class EmergencyRoomClient {
 
-    private static final String BASE_URL = "http://apis.data.go.kr/B552657/ErmctInfoInqireService";
+    private static final String BASE_URL = "https://apis.data.go.kr/B552657/ErmctInfoInqireService";
     /**
      * 응급의료기관 목록정보 조회 — 주소·진료요일 등으로 필터할 수 있으나, 조건 없이 호출하면 전국 목록을 준다. 위치정보
      * 조회(Lcinfo)와 달리 진료시간 필터가 없어 밤에도 결과가 유지된다.
