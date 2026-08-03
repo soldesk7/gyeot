@@ -6,15 +6,32 @@
 //     수동 선택(/guide)으로 가는 버튼을 같은 크기로 유지한다 — 빈 화면 금지 (N-08)
 //   - "맞나요?" 확인 버튼과 "잘 모르겠어요" 버튼도 같은 크기로 (아키텍처 문서 6절)
 //   - 확신도 판정은 BFF가 한다 — 프론트에서 0.6 같은 기준값을 만들지 않는다
-import PhotoUploader from '../components/PhotoUploader'
-import PhotoResult from '../components/PhotoResult'
+import { useState } from "react";
+import PhotoUploader from "../components/PhotoUploader";
+import PhotoResult from "../components/PhotoResult";
+
+/**
+ * 사진 인식 API가 반환하는 결과입니다.
+ *
+ * @typedef {Object} RecognitionResult
+ * @property {"burn"| "bleeding" | "unconscious" | "unknown"} category 추정된 상황 범주
+ * @property {number} confidence BFF가 판단한 신뢰도
+ * @property {string} visibleSigns 사진에서 관찰된 특징
+ */
 
 export default function ResultPage() {
+  /** @type {[RecognitionResult | null, React.Dispatch<React.SetStateAction<RecognitionResult | null>>]} */
+  const [result, setResult] = useState(null);
+
   return (
     <main className="page">
       <h1>사진으로 상황 확인</h1>
-      <PhotoUploader />
-      <PhotoResult />
+
+      {result ? (
+        <PhotoResult result={result} />
+      ) : (
+        <PhotoUploader onResult={setResult} />
+      )}
     </main>
-  )
+  );
 }
