@@ -36,8 +36,8 @@ public class GeminiClient {
     }
 
     public record Result(
-        String category,       // burn|bleeding|unconscious|unknown 중 하나 — §4 API 계약의 category 값과 동일
-        double confidence,     // 0.0~1.0, 모델이 스스로 매긴 확신도 (0.6 미만 처리는 SP3에서 결정)
+        String category,       // burn|bleeding|unconscious|unknown 중 하나 — 아키텍처 설계 4절 API 계약의 category 값과 동일
+        double confidence,     // 0.0~1.0, 모델이 스스로 매긴 확신도
         String visibleSigns    // 판단 근거가 된 시각적 특징 1문장 — 진단·처치 문구 아님, 관찰 서술만
     ) {}
 }
