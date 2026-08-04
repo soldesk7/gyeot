@@ -48,7 +48,23 @@ public class EmergencyRoomService {
             java.time.Instant fetchedAt,
             List<EgytListInfoResponse.Item> items
             ) {
+    }
 
+    /** 거리 계산을 한 번만 하고 정렬까지 마치기 위해 기관과 거리를 함께 들고 다니는 임시 타입. */
+    private record Nearby(
+            EgytListInfoResponse.Item item, int distanceM) {
+    }
+    
+    /**
+     * 한 시군구의 병상 현황과 그것을 받아온 시각.
+     *
+     * 기관ID(hpid)를 키로 사용하여 가용병상 수를 담는다. 목록과 짝지을 때 기관마다 목록을 훑지 않도록 받아온 시점에 Map으로
+     * 바꿔 둔다.
+     */
+    record BedSnapshot(
+            Instant fetchedAt,
+            Map<String, Integer> bedsByHpid
+            ) {
     }
 
     /**
@@ -78,24 +94,6 @@ public class EmergencyRoomService {
      */
     private static final int BEDS_LOOKUP_LIMIT = 5;
 
-    /** 거리 계산을 한 번만 하고 정렬까지 마치기 위해 기관과 거리를 함께 들고 다니는 임시 타입. */
-    private record Nearby(
-            EgytListInfoResponse.Item item, int distanceM) {
-    }
-
-    /**
-     * 한 시군구의 병상 현황과 그것을 받아온 시각.
-     *
-     * 기관ID(hpid)를 키로 사용하여 가용병상 수를 담는다. 목록과 짝지을 때 기관마다 목록을 훑지 않도록 받아온 시점에 Map으로
-     * 바꿔 둔다.
-     */
-    private record BedSnapshot(
-            Instant fetchedAt,
-            Map<String, Integer> bedsByHpid
-            ) {
-
-    }
-
     /**
      * 시군구별 병상 캐시.
      *
@@ -111,7 +109,7 @@ public class EmergencyRoomService {
     public EmergencyRoomService(
             EmergencyRoomClient emergencyRoomClient,
             @Value("${gyeot.emergency-room.beds-ttl-ms}") long bedsTtlMs
-        ) {
+    ) {
         this.emergencyRoomClient = emergencyRoomClient;
         this.bedsTtlMs = bedsTtlMs;
     }
@@ -151,33 +149,49 @@ public class EmergencyRoomService {
                 .limit(NEARBY_LIMIT)
                 .toList();
 
-        Map<String, Integer> beds = bedsFor(nearest);
+        BedSnapshot beds = bedsFor(nearest);
 
         List<EmergencyRoom> items = nearest.stream()
-                .map(n -> toEmergencyRoom(n.item(), n.distanceM(), beds.get(n.item().hpid())))
+                .map(n -> toEmergencyRoom(n.item(), n.distanceM(), beds.bedsByHpid().get(n.item().hpid())))
                 .toList();
 
-        // asOf: 응급실 목록을 공공데이터에서 받아온 시각. 요청 시각이 아니다.
-        // 프론트엔드에서 "이 정보가 얼마나 오래된 정보인지"를 알아야 하기 때문
-        return new EmergencyRoomsResponse(current.fetchedAt(), items);
+        /**
+         * asOf: 병상 현황을 받아온 시각. 요청 시각이 아니다.
+         * 프론트엔드에서 "이 정보가 얼마나 오래된 정보인지"를 알아야 하기 때문
+         * 병상을 하나도 받지 못하면 표시할 병상이 없으므로 목록 수집 시각으로 대체한다.
+         */
+        Instant asOf = beds.bedsByHpid().isEmpty() ? current.fetchedAt() : beds.fetchedAt();
+        return new EmergencyRoomsResponse(asOf, items);
     }
 
     /**
-     * 가까운 기관들이 속한 시군구의 병상 현황을 모아 기관ID별 표로 돌려준다.
+     * 가까운 기관들이 속한 시군구의 병상 현황을 모아 기관ID별 표로 수집하고
+     * 그중 가장 이른 수집 시각과 함께 돌려준다.
      *
      * 병상 조회는 요청을 처리하는 도중에 일어나므로 사용자가 그만큼 기다린다. 
      * 실측 응답 시간이 0.04~5.16초로 편차가 커 부르는 시군구 수를 줄임으로서 평균 응답 시간을 줄인다.
      * 시군구를 순서대로 부르므로 2개면 최악의 경우 두 번 기다린다 — 대기가 문제가 되면 동시 호출로 바꿀 수도 있다.
      */
-    private Map<String, Integer> bedsFor(List<Nearby> nearest) {
-        Map<String, Integer> merged = new HashMap<>();
-        nearest.stream()
+    private BedSnapshot bedsFor(List<Nearby> nearest) {
+        List<BedSnapshot> snapshots = nearest.stream()
                 .limit(BEDS_LOOKUP_LIMIT)
                 .map(n -> parseDistrict(n.item().dutyAddr()))
                 .filter(Objects::nonNull)
                 .distinct()
-                .forEach(district -> merged.putAll(bedsOf(district)));
-        return merged;
+                .map(this::bedsOf)
+                .toList();
+
+        Map<String, Integer> merged = new HashMap<>();
+        snapshots.forEach(snapshot -> merged.putAll(snapshot.bedsByHpid()));
+
+        // 여러 시군구가 섞이면 가장 이른 시각을 쓴다 — "이 시각 이후의 정보는 없다"가 보장된다.
+        // 시군구를 하나도 부르지 않았으면 merged가 비어 이 값이 응답에 쓰이지 않는다.
+        Instant oldest = snapshots.stream()
+                .map(BedSnapshot::fetchedAt)
+                .min(Comparator.naturalOrder())
+                .orElseGet(Instant::now);
+
+        return new BedSnapshot(oldest, merged);
     }
 
     /** 공공데이터에서 전국 응급실 목록을 새로 받아 스냅샷으로 만든다. 실패하면 예외가 그대로 올라간다. */
@@ -288,10 +302,10 @@ public class EmergencyRoomService {
      * 조회에 실패해도 예외를 올리지 않고 빈 결과를 돌려준다. 병상은 부가 정보라 이것 때문에 응급실 목록 전체가 실패하면 안 된다. -
      * 위치를 아는 것이 병상 수를 아는 것보다 우선이다.
      */
-    Map<String, Integer> bedsOf(District district) {
+    BedSnapshot bedsOf(District district) {
         BedSnapshot cached = bedCache.get(district);
         if (cached != null && Duration.between(cached.fetchedAt(), Instant.now()).toMillis() < bedsTtlMs) {
-            return cached.bedsByHpid();
+            return cached;
         }
 
         try {
@@ -303,14 +317,17 @@ public class EmergencyRoomService {
                             EmrrmRltmUsefulSckbdInfoResponse.Item::hpid,
                             EmrrmRltmUsefulSckbdInfoResponse.Item::hvec,
                             (first, second) -> first));   // 같은 기관이 중복으로 오면 먼저 온 것을 쓴다
-            bedCache.put(district, new BedSnapshot(Instant.now(), beds));
-            return beds;
+
+            BedSnapshot fresh = new BedSnapshot(Instant.now(), beds);
+            bedCache.put(district, fresh);
+            return fresh;
         } catch (HospitalDataUnavailableException e) {
             log.warn("병상 조회 실패 — 병상 없이 응답한다 ({} {})", district.sido(), district.sigungu(), e);
             // 실패도 캐시에 담는다. 담지 않으면 공공데이터가 불안정한 동안 요청마다 다시 호출해
             // 트래픽만 소비한다. TTL이 지나면 자연히 다시 시도한다.
-            bedCache.put(district, new BedSnapshot(Instant.now(), Map.of()));
-            return Map.of();
+            BedSnapshot failed = new BedSnapshot(Instant.now(), Map.of());
+            bedCache.put(district, failed);
+            return failed;
         }
     }
 }
