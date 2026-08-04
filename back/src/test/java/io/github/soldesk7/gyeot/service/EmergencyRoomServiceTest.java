@@ -1,18 +1,19 @@
 package io.github.soldesk7.gyeot.service;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 import io.github.soldesk7.gyeot.client.EmergencyRoomClient;
 import io.github.soldesk7.gyeot.dto.EgytListInfoResponse;
@@ -226,6 +227,34 @@ class EmergencyRoomServiceTest {
 
         verify(client, times(1)).findBeds("서울특별시", "강남구");
         verify(client, never()).findBeds("서울특별시", "송파구");
+    }
+
+    @Test
+    void 병상이_있으면_병상_시각을_쓴다() {
+        EmergencyRoomClient client = mock(EmergencyRoomClient.class);
+        when(client.findAll()).thenReturn(목록);
+        when(client.findBeds("서울특별시", "강남구")).thenReturn(BEDS);
+        EmergencyRoomService service = new EmergencyRoomService(client, TTL_KEEP);
+
+        Instant bedsAt = service.bedsOf(강남구).fetchedAt();
+        EmergencyRoomsResponse response = service.findNearby(37.4881326, 127.0851566);
+
+        assertEquals(bedsAt, response.asOf());
+    }
+    
+    @Test
+    void 병상을_못_받으면_목록_시각으로_대체한다() {
+        EmergencyRoomClient client = mock(EmergencyRoomClient.class);
+        when(client.findAll()).thenReturn(목록);
+        when(client.findBeds("서울특별시", "강남구"))
+                .thenThrow(new HospitalDataUnavailableException(new RuntimeException("트래픽 한도 초과")));
+        EmergencyRoomService service = new EmergencyRoomService(client, TTL_KEEP);
+
+        service.findNearby(37.4881326, 127.0851566);    // 목록 스냅샷 먼저 생성
+        Instant failedAt = service.bedsOf(강남구).fetchedAt();  // 실패도 캐시된다
+        EmergencyRoomsResponse response = service.findNearby(37.4881326, 127.0851566);
+
+        assertTrue(response.asOf().isBefore(failedAt));
     }
 
     private static EmergencyRoom findByName(List<EmergencyRoom> items, String name) {
