@@ -159,11 +159,11 @@ class EmergencyRoomServiceTest {
         when(client.findBeds("서울특별시", "강남구")).thenReturn(BEDS);
         EmergencyRoomService service = new EmergencyRoomService(client, TTL_KEEP);
 
-        assertEquals(0, service.bedsOf(강남구).get("A1100015"));    // 만실
-        assertEquals(-16, service.bedsOf(강남구).get("A1100010"));  // 16명 초과
+        assertEquals(0, service.bedsOf(강남구).bedsByHpid().get("A1100015"));    // 만실
+        assertEquals(-16, service.bedsOf(강남구).bedsByHpid().get("A1100010"));  // 16명 초과
 
         // 병상 값이 없는 기관은 담지 않는다 — 매칭 단계에서 availableBeds가 null이 된다.
-        assertFalse(service.bedsOf(강남구).containsKey("A9999999"));
+        assertFalse(service.bedsOf(강남구).bedsByHpid().containsKey("A9999999"));
 
         verify(client, times(1)).findBeds("서울특별시", "강남구");
     }
@@ -193,8 +193,8 @@ class EmergencyRoomServiceTest {
                 .thenThrow(new HospitalDataUnavailableException(new RuntimeException("트래픽 한도 초과")));
         EmergencyRoomService service = new EmergencyRoomService(client, TTL_KEEP);
 
-        assertTrue(service.bedsOf(강남구).isEmpty());
-        assertTrue(service.bedsOf(강남구).isEmpty());
+        assertTrue(service.bedsOf(강남구).bedsByHpid().isEmpty());
+        assertTrue(service.bedsOf(강남구).bedsByHpid().isEmpty());
 
         verify(client, times(1)).findBeds("서울특별시", "강남구");
     }
