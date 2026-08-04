@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 export default function CategoryPicker() {
     const [categories, setCategories] = useState([]);
     const [error, setError] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetch("/mock/guides/list.json")
@@ -14,13 +15,18 @@ export default function CategoryPicker() {
             return response.json();
         })
             .then((data) => setCategories(data))
-            .catch((error) => setError(true));
+            .catch((error) => setError(true))
+            .finally(() => setLoading(false));
     }, []);
 
     return (
         <main className="page">
             <h1>증상 직접 선택</h1>
 
+            {loading && (
+                <p>증상 목록을 불러오는 중입니다...</p>
+            )}
+            
             {error && (
                 <p>증상 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.</p>
             )}
