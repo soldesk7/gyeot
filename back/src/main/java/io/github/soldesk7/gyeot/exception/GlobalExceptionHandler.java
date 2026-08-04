@@ -22,8 +22,7 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * 두 핸들러에서 같은 응답을 반환하므로 문구를 한 곳에서 관리한다.
-     * record는 불변이라 공유해도 안전하다.
+     * 두 핸들러에서 같은 응답을 반환하므로 문구를 한 곳에서 관리한다. record는 불변이라 공유해도 안전하다.
      */
     private static final ErrorResponse MISSING_PHOTO = new ErrorResponse("MISSING_PHOTO", "사진을 다시 선택해 주세요.");
     private static final ErrorResponse MISSING_LOCATION = new ErrorResponse("MISSING_LOCATION", "위치 정보를 가져오지 못했어요.");
@@ -36,8 +35,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMissingParameter(MissingServletRequestParameterException ex) {
         return switch (ex.getParameterName()) {
-            case "lat", "lng" -> MISSING_LOCATION;
-            default -> MISSING_PHOTO;
+            case "lat", "lng" ->
+                MISSING_LOCATION;
+            default ->
+                MISSING_PHOTO;
         };
     }
 
@@ -76,6 +77,26 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleHospitalDataUnavailable(HospitalDataUnavailableException ex) {
         log.warn("공공데이터 응급실 조회 실패", ex);
         return new ErrorResponse("HOSPITAL_DATA_UNAVAILABLE", "응급실 정보를 불러오지 못했어요.");
+    }
+
+    /**
+     * 정의되지 않은 카테고리 요청. 콘텐츠가 준비된 세 가지 밖의 값이 경로 변수로 들어온 경우이며
+     * 프론트엔드 측에선 전달된 잘못된 요청이라 로그를 남기지 않는다.
+     */
+    @ExceptionHandler(GuideNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleGuideNotFound() {
+        return new ErrorResponse("NOT_FOUND", "요청한 상황 안내를 찾을 수 없어요.");
+    }
+
+    /**
+     * 알려진 카테고리인데 콘텐츠를 갖고 있지 않은 상태. 요청은 올바르므로 서버 측 문제로 응답한다.
+     */
+    @ExceptionHandler(GuideUnavailableException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorResponse handleGuideUnavailable(GuideUnavailableException ex) {
+        log.warn("가이드 콘텐츠 로드 실패 {}", ex.getMessage());
+        return new ErrorResponse("GUIDE_UNAVAILABLE", "안내 자료를 불러오지 못했어요.");
     }
 
     /**
