@@ -28,7 +28,7 @@ public class RecognitionController {
             return recognitionService.recognize(photo.getBytes(), photo.getContentType());
         } catch (IOException e) {
             // 파일 읽기 실패도 인식 실패의 일종 — 죽은 화면 금지(N-01), 서비스와 같은 폴백
-            return new RecognitionResponse(RecognitionCategory.UNKNOWN, 0.0, "");
+            return new RecognitionResponse(RecognitionCategory.UNKNOWN, 0.0, "", true);
         }
     }
 }
