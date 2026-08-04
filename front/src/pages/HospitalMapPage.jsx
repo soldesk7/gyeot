@@ -33,6 +33,30 @@ function loadKakaoMaps() {
 // 서울시청 — 위치 권한을 거부/실패했을 때 쓰는 기본 좌표
 const FALLBACK_CENTER = { lat: 37.566826, lng: 126.9786567 }
 
+//----------------------병상 표시 코드------------------------
+
+function bedStatusText(availableBeds) {
+  if (availableBeds === null) {
+    return null
+  } else if (availableBeds > 0) {
+    return `여유 병상 ${availableBeds}개`
+  } else if (availableBeds === 0) {
+    return '만실'
+  } else 
+    return `정원 초과 ${Math.abs(availableBeds)}명`
+}
+
+//----------------------병상 표시 코드 끝---------------------
+
+//----------------------기준 시각 표기------------------------
+
+function formatAsOf(asOf) {
+  const date = new Date(asOf)
+  return `${date.getHours()}시 ${date.getMinutes()}분 기준`
+}
+
+//----------------------기준 시각 표기 끝---------------------
+
 // 위치 권한이 거부되거나 브라우저가 지원하지 않아도 reject 대신 fallback 좌표로 resolve한다 —
 // 지도 자체는 항상 뜨게 하기 위함(N-08, 화면이 멈추면 안 됨).
 function getCurrentPosition() {
@@ -71,11 +95,28 @@ export default function HospitalMapPage() {
         return fetchHospitals(position.lat, position.lng).then((data) => {
           if (cancelled) return
           data.items.forEach((hospital) => {
-            new kakao.maps.Marker({
-              position: new kakao.maps.LatLng(hospital.lat, hospital.lng),
-              map
+            const hospitalPosition = new kakao.maps.LatLng(hospital.lat, hospital.lng)
+            const marker = new kakao.maps.Marker({ position: hospitalPosition, map })
+
+            const bedText = bedStatusText(hospital.availableBeds)
+            const content = `
+              <div style="padding:8px 10px; font-size:13px; width:200px; white-space:normal;">
+                <strong>${hospital.name}</strong><br/>
+                ${bedText !== null ? `${bedText} (${formatAsOf(data.asOf)})` : ''}
+              </div>
+            `
+            const infowindow = new kakao.maps.InfoWindow({ content })
+
+            kakao.maps.event.addListener(marker, 'click', () => {
+              if (infowindow.getMap()) {
+                infowindow.close()
+              } else {
+                infowindow.open(map, marker)
+              }
             })
           })
+
+
           setUsedFallback(position.isFallback)
           setStatus('ready')
         })
