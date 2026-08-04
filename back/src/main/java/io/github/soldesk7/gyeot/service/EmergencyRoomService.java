@@ -48,7 +48,23 @@ public class EmergencyRoomService {
             java.time.Instant fetchedAt,
             List<EgytListInfoResponse.Item> items
             ) {
+    }
 
+    /** 거리 계산을 한 번만 하고 정렬까지 마치기 위해 기관과 거리를 함께 들고 다니는 임시 타입. */
+    private record Nearby(
+            EgytListInfoResponse.Item item, int distanceM) {
+    }
+    
+    /**
+     * 한 시군구의 병상 현황과 그것을 받아온 시각.
+     *
+     * 기관ID(hpid)를 키로 사용하여 가용병상 수를 담는다. 목록과 짝지을 때 기관마다 목록을 훑지 않도록 받아온 시점에 Map으로
+     * 바꿔 둔다.
+     */
+    record BedSnapshot(
+            Instant fetchedAt,
+            Map<String, Integer> bedsByHpid
+            ) {
     }
 
     /**
@@ -77,24 +93,6 @@ public class EmergencyRoomService {
      * (실측 45곳 기준 상위 3개 등급은 전부 보고).
      */
     private static final int BEDS_LOOKUP_LIMIT = 5;
-
-    /** 거리 계산을 한 번만 하고 정렬까지 마치기 위해 기관과 거리를 함께 들고 다니는 임시 타입. */
-    private record Nearby(
-            EgytListInfoResponse.Item item, int distanceM) {
-    }
-
-    /**
-     * 한 시군구의 병상 현황과 그것을 받아온 시각.
-     *
-     * 기관ID(hpid)를 키로 사용하여 가용병상 수를 담는다. 목록과 짝지을 때 기관마다 목록을 훑지 않도록 받아온 시점에 Map으로
-     * 바꿔 둔다.
-     */
-    record BedSnapshot(
-            Instant fetchedAt,
-            Map<String, Integer> bedsByHpid
-            ) {
-
-    }
 
     /**
      * 시군구별 병상 캐시.
