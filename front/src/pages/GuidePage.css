@@ -5,6 +5,7 @@
   object-fit: contain;
   background: #000;
   border-radius: 8px;
+  border: 0; /* iframe(유튜브 임베드) 기본 테두리 제거 */
 }
 .guide-header {
   display: flex;
@@ -26,6 +27,26 @@
   background: var(--bg);
   white-space: nowrap;
 }
+.guide-sections {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .guide-step {
   list-style: none; /* <ol>의 자동 번호(1. 2. 3.) 끄기 */
 }
@@ -34,4 +55,9 @@
   display: block;
   font-weight: 700;
   margin-bottom: 4px;
+}
+
+.guide-source {
+  font-size: 14px;
+  color: var(--border);
 }
