@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchGuides } from "../api/guides";
 
-export default function CategoryPicker() {
+export default function CategoryPickerPage() {
     const [categories, setCategories] = useState([]);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("/mock/guides/list.json")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("카테고리 조회 실패");
-                }
-            return response.json();
-        })
+        fetchGuides()
             .then((data) => setCategories(data))
             .catch((error) => setError(true))
             .finally(() => setLoading(false));

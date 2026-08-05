@@ -13,7 +13,7 @@ import ResultPage from './pages/ResultPage.jsx'
 import GuidePage from './pages/GuidePage.jsx'
 import HospitalMapPage from './pages/HospitalMapPage.jsx'
 import NoticePage from './pages/NoticePage.jsx'
-import CategoryPicker from './components/CategoryPicker.jsx'
+import CategoryPickerPage from './pages/CategoryPickerPage.jsx'
 
 // 오류 경계(Error Boundary): 자식 컴포넌트가 렌더링 중 오류를 던지면
 // 앱 전체가 하얀 화면이 되는 대신, 여기서 잡아서 안내 화면을 대신 보여준다.
@@ -51,7 +51,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />                      {/* 화면 A — 홈 */}
             <Route path="/result" element={<ResultPage />} />              {/* 화면 B — 사진 인식 */}
-            <Route path="/guide" element={<CategoryPicker />} />           {/* 화면 C — 증상 선택 */}
+            <Route path="/guide" element={<CategoryPickerPage />} />       {/* 화면 C — 증상 선택 */}
             <Route path="/guide/:category" element={<GuidePage />} />      {/* 화면 C — 개별 가이드 (:category는 변수) */}
             <Route path="/map" element={<HospitalMapPage />} />            {/* 화면 D — 응급실 지도 */}
             <Route path="/notice" element={<NoticePage />} />              {/* 화면 E — 이용 안내 */}
