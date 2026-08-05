@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import io.github.soldesk7.gyeot.client.GeminiClient;
 import io.github.soldesk7.gyeot.dto.RecognitionCategory;
 import io.github.soldesk7.gyeot.dto.RecognitionResponse;
+import io.github.soldesk7.gyeot.exception.RecognitionRateLimitedException;
 
 @Service
 public class RecognitionService {
@@ -24,14 +25,21 @@ public class RecognitionService {
         this.geminiClient = geminiClient;
     }
 
+    /**
+     * 사진을 GeminiClient에 보내 인식 결과를 받는다.
+     * 요청 한도 초과는 흡수하지 않고 RecognitionRateLimitedException으로 올려보낸다.
+     */
     public RecognitionResponse recognize(byte[] imageBytes, String mimeType) {
         try {
             GeminiClient.Result result = geminiClient.recognize(imageBytes, mimeType);
             RecognitionCategory category = RecognitionCategory.fromJson(result.category());
             return new RecognitionResponse(category, result.confidence(), result.visibleSigns(),
                     isLowConfidence(category, result.confidence(), result.visibleSigns()));
+        } catch (RecognitionRateLimitedException e) {
+            throw e;    // 계약 응답으로 내보낸다
         } catch (Exception e) {
-            // 원인 불문(차단·파싱·네트워크) UNKNOWN으로 흡수 — 죽은 화면 금지(N-01), 원인별 세분화는 SP3
+            // 요청 한도 초과는 앞에서 걸러 계약 응답으로 내보낸다.
+            // 나머지는 원인 불문(차단·파싱·네트워크) UNKNOWN으로 흡수 — 죽은 화면 금지(N-01)
             // 사진 바이트는 로그에 남기지 않음(N-03 무로깅) — 예외 정보만 기록
             log.warn("Gemini 인식 실패, unknown으로 폴백", e);
             return new RecognitionResponse(RecognitionCategory.UNKNOWN, 0.0, "", true);
