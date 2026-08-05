@@ -40,6 +40,10 @@ export default function CategoryPicker() {
                     {category.title}
                 </Link>
             ))}
+            
+            <Link className="action" to="/">
+                홈으로
+            </Link>
         </main>
     );
 }

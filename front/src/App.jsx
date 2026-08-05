@@ -51,7 +51,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />                      {/* 화면 A — 홈 */}
             <Route path="/result" element={<ResultPage />} />              {/* 화면 B — 사진 인식 */}
-            <Route path="/guide" element={<CategoryPicker />} />                {/* 화면 C — 증상 선택 */}
+            <Route path="/guide" element={<CategoryPicker />} />           {/* 화면 C — 증상 선택 */}
             <Route path="/guide/:category" element={<GuidePage />} />      {/* 화면 C — 개별 가이드 (:category는 변수) */}
             <Route path="/map" element={<HospitalMapPage />} />            {/* 화면 D — 응급실 지도 */}
             <Route path="/notice" element={<NoticePage />} />              {/* 화면 E — 이용 안내 */}
