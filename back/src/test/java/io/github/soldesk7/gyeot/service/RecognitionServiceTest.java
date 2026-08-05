@@ -2,6 +2,7 @@ package io.github.soldesk7.gyeot.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 import io.github.soldesk7.gyeot.client.GeminiClient;
 import io.github.soldesk7.gyeot.dto.RecognitionCategory;
 import io.github.soldesk7.gyeot.dto.RecognitionResponse;
+import io.github.soldesk7.gyeot.exception.RecognitionRateLimitedException;
 
 /**
  * RecognitionService의 저확신 판정 규칙을 검증한다.
@@ -17,6 +19,7 @@ import io.github.soldesk7.gyeot.dto.RecognitionResponse;
  * 이 판정은 응답의 boolean 하나로만 드러나고 값이 뒤집혀도 화면은 정상으로 보인다. 다만 참이어야 할 때 거짓이면 확신 없는 인식
  * 결과가 확정된 사실처럼 노출되어 비진단 원칙을 어기고 반대로 거짓이어야 할 때 참이면 멀쩡한 인식 결과가 매번 수동 선택으로 밀려난다.
  * 그래서 기준값 경계와 범주 미선택을 값으로 고정해 둔다.
+ * 요청 한도 초과만 예외로 올려보내고 나머지 실패는 흡수하는지도 함께 확인한다.
  *
  * Client를 목으로 대체하므로 Gemini를 부르지 않는다.
  */
@@ -80,10 +83,17 @@ public class RecognitionServiceTest {
     private static RecognitionResponse 인식(String category, double confidence) {
         return 인식(category, confidence, "관찰된 시각적 특징");
     }
+    @Test
+    void 요청_한도_초과는_흡수하지_않고_올려보낸다() {
+        // 다른 실패와 달리 화면이 다르게 안내해야 하므로 계약 응답으로 나가야 한다.
+        GeminiClient client = mock(GeminiClient.class);
+        when(client.recognize(PHOTO, MIME))
+                .thenThrow(new RecognitionRateLimitedException(new RuntimeException("429")));
+        RecognitionService service = new RecognitionService(client);
 
-    /**
-     * Gemini가 주어진 범주·확신도로 답했을 때의 인식 결과.
-     */
+        assertThrows(RecognitionRateLimitedException.class, () -> service.recognize(PHOTO, MIME));
+    }
+
     /**
      * Gemini가 관찰 문장까지 지정해 답했을 때의 인식 결과.
      */
