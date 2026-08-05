@@ -9,10 +9,10 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import io.github.soldesk7.gyeot.dto.ErrorResponse;
 
@@ -97,6 +97,21 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleGuideUnavailable(GuideUnavailableException ex) {
         log.warn("가이드 콘텐츠 로드 실패 {}", ex.getMessage());
         return new ErrorResponse("GUIDE_UNAVAILABLE", "안내 자료를 불러오지 못했어요.");
+    }
+
+    /**
+     * Gemini 요청 한도 초과. 다른 4xx와 달리 로그를 남긴다 — 클라이언트가 잘못 부른 것이 아니라
+     * 우리 할당량이 소진된 상태라 서버에서 알아야 한다.
+     *
+     * 분당 한도와 일일 한도가 모두 429로 오고 구분할 수 없다. 분당 한도 문제일 가능성이 높으므로 1분을
+     * 안내하되 수동 선택을 나란히 제시해 그때도 안 되면 다른 선택지가 남아 있게 한다.
+     */
+    @ExceptionHandler(RecognitionRateLimitedException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ErrorResponse handleRateLimited(RecognitionRateLimitedException ex) {
+        log.warn("Gemini 요청 한도 초과", ex);
+        return new ErrorResponse("RATE_LIMITED",
+                "요청이 많아 지금은 자동 인식이 어려워요. 1분 뒤 다시 시도하거나 직접 선택해 주세요.");
     }
 
     /**
