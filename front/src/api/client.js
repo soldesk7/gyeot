@@ -39,7 +39,7 @@ export async function request(path, options) {
   if (!res.ok) {
     // 오류 몸체가 JSON이 아닐 수도 있으므로(프록시 오류 등) 파싱 실패 시 빈 객체로 대체
     const body = await res.json().catch(() => ({}))
-    throw new ApiError(body.error ?? 'UNKNOWN', body.message ?? '요청에 실패했어요.', res.status)
+    throw new ApiError(body.error ?? 'UNKNOWN', body.message, res.status)
   }
   try {
   return await res.json()

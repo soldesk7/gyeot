@@ -23,7 +23,7 @@ export default function CategoryPickerPage() {
             )}
             
             {error && (
-                <p>{error.message ?? "증상 목록을 불러오지 못했어요."}</p>
+                <p>{error.message || "증상 목록을 불러오지 못했어요."}</p>
             )}
 
             {categories.map((category) => (

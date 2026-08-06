@@ -79,7 +79,7 @@ export default function GuidePage() {
 
       {status === 'error' && (
         <div className="card">
-          <p>{error?.message ?? '가이드를 불러오지 못했어요.'}</p>
+          <p>{error?.message || '가이드를 불러오지 못했어요.'}</p>
           <p>급한 상황이면 위 119 배너로 바로 신고할 수 있어요.</p>
         </div>
       )}
