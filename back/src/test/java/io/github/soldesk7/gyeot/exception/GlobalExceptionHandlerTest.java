@@ -8,8 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import io.github.soldesk7.gyeot.controller.EmergencyRoomController;
 import io.github.soldesk7.gyeot.controller.RecognitionController;
@@ -51,5 +53,22 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("MISSING_LOCATION"))
                 .andExpect(jsonPath("$.message").isNotEmpty());
+    }
+
+    /**
+     * 브라우저가 보내는 Accept 헤더로 요청해도 계약 형식(JSON)으로 응답하는지 검증한다.
+     *
+     * 공공데이터 XML 파싱을 위해 jackson-dataformat-xml이 의존성에 있어 XML 응답 변환기가
+     * 자동 등록된다. 응답 형식을 고정하지 않으면 같은 엔드포인트가 클라이언트에 따라 XML을
+     * 돌려주는데, 프론트는 와일드카드를 보내 JSON을 받으므로 화면만 봐서는 드러나지 않는다.
+     */
+    @Test
+    void 브라우저_Accept로_요청해도_JSON으로_응답한다() throws Exception {
+        mockMvc.perform(get("/api/v1/emergency-rooms")
+                .accept(MediaType.parseMediaType("application/xhtml+xml"),
+                        MediaType.parseMediaType("application/xml")))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("MISSING_LOCATION"));
     }
 }
