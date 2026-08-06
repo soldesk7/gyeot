@@ -23,7 +23,9 @@ function loadKakaoMaps() {
       return
     }
     const script = document.createElement('script')
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`
+    // 카카오맵 SDK는 주소검색 같은 부가 기능을 쓰려면 libraries라는 옵션을 따로 불러와야함
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`
+
     script.onload = () => window.kakao.maps.load(() => resolve(window.kakao))
     script.onerror = () => reject(new Error('카카오맵 스크립트 로드 실패'))
     document.head.appendChild(script)
@@ -77,8 +79,67 @@ function getCurrentPosition() {
   })
 }
 
+// 좌표 하나를 기준으로 지도 중심을 옮기고 그 주변 응급실 마커를 채워 넣는다.
+// 내 위치로 시작할 때도, 주소 검색으로 다시 그릴 때도 이 함수 하나를 재사용한다.
+function showHospitalsAround(kakao, map, lat, lng, centerOverlayRef, hospitalMarkersRef) {
+//-----------기존 마커 제거----------------
+  if (centerOverlayRef.current) {
+  centerOverlayRef.current.setMap(null)
+  }
+  hospitalMarkersRef.current.forEach(({ marker, infowindow }) => {
+  marker.setMap(null)
+  infowindow.close()
+})
+//-----------기존 마커 제거 끝----------------
+hospitalMarkersRef.current = []
+
+  const center = new kakao.maps.LatLng(lat, lng)
+  map.setCenter(center) // ← 새 줄 ①: 지도를 새로 만들지 않고, 기존 지도의 중심만 옮김
+  
+//-----------현위치 마커 overlay변수에 저장----------------
+  const overlay = new kakao.maps.CustomOverlay({
+  position: center,
+  map,
+  content: '<div style="width:20px;height:20px;border-radius:50%;background:#e53935;border:2px solid white;box-shadow:0 0 2px rgba(0,0,0,0.5);"></div>',
+})
+//-----------현위치 저장한 overlay를 ref에 저장----------------
+centerOverlayRef.current = overlay
+
+  return fetchHospitals(lat, lng).then((data) => { // ← 새 줄 ②: 여기서 return
+    data.items.forEach((hospital) => {
+      const hospitalPosition = new kakao.maps.LatLng(hospital.lat, hospital.lng)
+      const marker = new kakao.maps.Marker({ position: hospitalPosition, map })
+
+      const bedText = bedStatusText(hospital.availableBeds)
+      const content = `
+        <div style="padding:8px 10px; font-size:13px; width:200px; white-space:normal;">
+          <strong>${hospital.name}</strong><br/>
+          ${bedText !== null ? `${bedText} (${formatAsOf(data.asOf)})` : ''}
+        </div>
+      `
+      const infowindow = new kakao.maps.InfoWindow({ content })
+
+      kakao.maps.event.addListener(marker, 'click', () => {
+        if (infowindow.getMap()) {
+          infowindow.close()
+        } else {
+          infowindow.open(map, marker)
+        }
+      })
+//----------------------마커 + 인포윈도우 배열에 저장------------------------
+      hospitalMarkersRef.current.push({ marker, infowindow })
+    })
+    // setUsedFallback, setStatus는 여기 안 넣습니다 (다음 단계에서 다르게 처리할 거예요)
+  })
+}
+
 export default function HospitalMapPage() {
   const mapContainerRef = useRef(null)
+  const addressInputRef = useRef(null)
+  const kakaoRef = useRef(null)   // ← 새로 추가
+  const mapRef = useRef(null)     // ← 새로 추가
+  const centerOverlayRef = useRef(null)   // 중심점 빨간 원 (한 개만 존재)
+const hospitalMarkersRef = useRef([])   // 병원 마커 + 인포윈도우 목록
   const [status, setStatus] = useState('loading') // 'loading' | 'ready' | 'error'
   const [usedFallback, setUsedFallback] = useState(false)
 
@@ -89,51 +150,52 @@ export default function HospitalMapPage() {
         if (cancelled || !mapContainerRef.current) return
         const center = new kakao.maps.LatLng(position.lat, position.lng)
         const map = new kakao.maps.Map(mapContainerRef.current, { center, level: 3 })
-        new kakao.maps.CustomOverlay({ position: center, map, content: '<div style="width:20px;height:20px;border-radius:50%;background:#e53935;border:2px solid white;box-shadow:0 0 2px rgba(0,0,0,0.5);"></div>' })
-        
-        //--------응급실 마커 찍기 시작--------
-        return fetchHospitals(position.lat, position.lng).then((data) => {
+        kakaoRef.current = kakao   // ← 새 줄: 나중에 검색 버튼에서 쓰려고 저장
+        mapRef.current = map       // ← 새 줄: 나중에 검색 버튼에서 쓰려고 저장
+
+        return showHospitalsAround(kakao, map, position.lat, position.lng, centerOverlayRef, hospitalMarkersRef).then(() => {
           if (cancelled) return
-          data.items.forEach((hospital) => {
-            const hospitalPosition = new kakao.maps.LatLng(hospital.lat, hospital.lng)
-            const marker = new kakao.maps.Marker({ position: hospitalPosition, map })
-
-            const bedText = bedStatusText(hospital.availableBeds)
-            const content = `
-              <div style="padding:8px 10px; font-size:13px; width:200px; white-space:normal;">
-                <strong>${hospital.name}</strong><br/>
-                ${bedText !== null ? `${bedText} (${formatAsOf(data.asOf)})` : ''}
-              </div>
-            `
-            const infowindow = new kakao.maps.InfoWindow({ content })
-
-            kakao.maps.event.addListener(marker, 'click', () => {
-              if (infowindow.getMap()) {
-                infowindow.close()
-              } else {
-                infowindow.open(map, marker)
-              }
-            })
-          })
-
-
           setUsedFallback(position.isFallback)
           setStatus('ready')
         })
-        //--------응급실 마커 찍기 끝--------
-        
       })
       .catch(() => {
         if (!cancelled) setStatus('error')
       })
+
     return () => {
       cancelled = true
     }
   }, [])
+  
+  function handleSearch() {
+    const address = addressInputRef.current.value.trim()
+    if (!address) return
+
+    const kakao = kakaoRef.current
+  const geocoder = new kakao.maps.services.Geocoder()
+
+  geocoder.addressSearch(address, (results, status) => {
+  if (status !== kakao.maps.services.Status.OK) {
+    alert('주소를 찾을 수 없습니다.')
+    return
+  }
+  
+  const lat = Number(results[0].y)
+  const lng = Number(results[0].x)
+
+  showHospitalsAround(kakao, mapRef.current, lat, lng, centerOverlayRef, hospitalMarkersRef)
+  setUsedFallback(false)
+})
+  }
 
   return (
     <main className="page">
       <h1>주변 응급실</h1>
+      <div style={{ display: 'flex', gap: '8px' }}>
+  <input ref={addressInputRef} type="text" placeholder="주소를 입력하세요" />
+  <button onClick={handleSearch}>검색</button>
+</div>
       {status === 'error' && (
         <p>지도를 불러오지 못했습니다. VITE_KAKAO_MAP_KEY와 카카오 개발자 콘솔의 도메인 등록을 확인하세요.</p>
       )}
