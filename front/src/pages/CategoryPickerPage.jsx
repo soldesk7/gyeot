@@ -1,21 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchGuides } from "../api/guides";
 
-export default function CategoryPicker() {
+export default function CategoryPickerPage() {
     const [categories, setCategories] = useState([]);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("/mock/guides/list.json")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("카테고리 조회 실패");
-                }
-            return response.json();
-        })
+        fetchGuides()
             .then((data) => setCategories(data))
-            .catch((error) => setError(true))
+            .catch((error) => setError(error))
             .finally(() => setLoading(false));
     }, []);
 
@@ -28,7 +23,7 @@ export default function CategoryPicker() {
             )}
             
             {error && (
-                <p>증상 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.</p>
+                <p>{error.message ?? "증상 목록을 불러오지 못했어요."}</p>
             )}
 
             {categories.map((category) => (
