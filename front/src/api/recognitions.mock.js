@@ -1,8 +1,6 @@
-// TODO: 하드코딩으로 MOCK_SCENARIO의 임의의 변수 지정보다 시나리오 이름으로 선택할 수 있어야 합니다. 예를 들면 "success", "low-confidence", "unknown", "rate-limited"를 switch 또는 응답 맵으로 관리하는 방식입니다.
-
 import { ApiError } from "./client";
 
-const MOCK_SCENARIO = "success";
+const MOCK_SCENARIO = "success"; // TODO: 하드코딩으로 MOCK_SCENARIO의 임의의 변수 지정보다 시나리오 이름으로 선택할 수 있어야 합니다. 예를 들면 "success", "low-confidence", "unknown", "rate-limited"를 switch 또는 응답 맵으로 관리하는 방식입니다.
 
 export const recognize = (_photo) => {
   switch (MOCK_SCENARIO) {
@@ -40,7 +38,11 @@ export const recognize = (_photo) => {
     /** 요청 제한 */
     case "rate-limited":
       return Promise.reject(
-        new ApiError("RATE_LIMITED", "목업: 요청 제한", 429),
+        new ApiError(
+          "RATE_LIMITED",
+          "목업: 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+          429,
+        ),
       );
 
     /** 서버 오류 (예: 안전 필터 거부) */
@@ -48,20 +50,26 @@ export const recognize = (_photo) => {
       return Promise.reject(
         new ApiError(
           "INTERNAL_ERROR",
-          "서버에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+          "목업: 서버에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
           500,
         ),
       );
 
     /** 네트워크 오류 */
     case "network":
-      return Promise.reject(new ApiError("NETWORK", "목업: 호출 실패", 0));
+      return Promise.reject(
+        new ApiError(
+          "NETWORK",
+          "목업: 인터넷에 문제가 발생했습니다. 연결 상태를 확인하고 잠시 후 다시 시도해주세요.",
+          0,
+        ),
+      );
 
     default:
       return Promise.reject(
         new ApiError(
           "UNKNOWN_MOCK_SCENARIO",
-          "지원하지 않는 목 시나리오입니다.",
+          "목업: 지원하지 않는 목 시나리오입니다.",
           0,
         ),
       );
