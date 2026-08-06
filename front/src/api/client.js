@@ -41,5 +41,9 @@ export async function request(path, options) {
     const body = await res.json().catch(() => ({}))
     throw new ApiError(body.error ?? 'UNKNOWN', body.message ?? '요청에 실패했어요.', res.status)
   }
-  return res.json()
+  try {
+  return await res.json()
+} catch {
+  throw new ApiError('INVALID_RESPONSE', '서버 응답을 처리하지 못했어요.', res.status)
+}
 }
