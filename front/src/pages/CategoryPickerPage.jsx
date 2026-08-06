@@ -4,13 +4,13 @@ import { fetchGuides } from "../api/guides";
 
 export default function CategoryPickerPage() {
     const [categories, setCategories] = useState([]);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchGuides()
             .then((data) => setCategories(data))
-            .catch((error) => setError(true))
+            .catch((error) => setError(error))
             .finally(() => setLoading(false));
     }, []);
 
@@ -23,7 +23,7 @@ export default function CategoryPickerPage() {
             )}
             
             {error && (
-                <p>증상 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.</p>
+                <p>{error.message ?? "증상 목록을 불러오지 못했어요."}</p>
             )}
 
             {categories.map((category) => (
