@@ -31,7 +31,7 @@ export default function ResultPage() {
       <h1>사진으로 상황 확인</h1>
       {error ? (
         <>
-          <p>{error.message || "사진을 인식하지 못했어요."}</p>
+          <p>{error.message || "지금은 사진 인식을 이용할 수 없어요."}</p>
           <button className="action" onClick={() => setError(null)}>
             다시 시도
           </button>
