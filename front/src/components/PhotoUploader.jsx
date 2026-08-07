@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import UploadNotice from './UploadNotice'
 import { recognize } from '../api/recognitions'
 
-export default function PhotoUploader({ onResult }) {
+export default function PhotoUploader({ onResult, onError }) {
   const [agreed, setAgreed] = useState(false)
   const [photo, setPhoto] = useState(null)
 
@@ -20,6 +20,7 @@ export default function PhotoUploader({ onResult }) {
       })
       .catch((err) => {
         console.error('인식 실패:', err)
+        onError?.(err)
       })
   }
 

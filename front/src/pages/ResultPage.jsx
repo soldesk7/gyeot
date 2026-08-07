@@ -7,6 +7,7 @@
 //   - "맞나요?" 확인 버튼과 "잘 모르겠어요" 버튼도 같은 크기로 (아키텍처 문서 6절)
 //   - 확신도 판정은 BFF가 한다 — 프론트에서 0.6 같은 기준값을 만들지 않는다
 import { useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import PhotoUploader from "../components/PhotoUploader";
 import PhotoResult from "../components/PhotoResult";
 
@@ -16,21 +17,41 @@ import PhotoResult from "../components/PhotoResult";
  * @typedef {Object} RecognitionResult
  * @property {"burn"| "bleeding" | "unconscious" | "unknown"} category 추정된 상황 범주
  * @property {number} confidence BFF가 판단한 신뢰도
- * @property {string} visibleSigns 사진에서 관찰된 특징
+ * @property {string} visibleSigns 관찰된 시각적 특징 1문장
+ * @property {boolean} lowConfidence BFF가 판단한 저확신 여부
  */
 
 export default function ResultPage() {
   /** @type {[RecognitionResult | null, React.Dispatch<React.SetStateAction<RecognitionResult | null>>]} */
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
 
   return (
     <main className="page">
       <h1>사진으로 상황 확인</h1>
+      {error ? (
+        <>
+          <p>{error.message || "인식하지 못했어요."}</p>
+          <button className="action" onClick={() => setError(null)}>
+            다시 시도
+          </button>
 
-      {result ? (
+          <Link className="action" to="/guide">
+            증상 직접 선택
+          </Link>
+        </>
+      ) : result?.lowConfidence === true ? (
+        <Navigate to="/guide" replace />
+      ) : result ? (
         <PhotoResult result={result} />
       ) : (
-        <PhotoUploader onResult={setResult} />
+        <PhotoUploader
+          onResult={(nextResult) => {
+            setError(null);
+            setResult(nextResult);
+          }}
+          onError={setError}
+        />
       )}
     </main>
   );
