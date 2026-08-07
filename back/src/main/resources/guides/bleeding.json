@@ -3,16 +3,87 @@
   "title": "출혈·외상",
   "sections": [
     {
-      "title": "임시 구획 — F5 자료로 교체 예정",
+      "title": "절단상 처치",
       "steps": [
-        "임시 단계 1 — 공식 출처 문장으로 교체합니다.",
-        "임시 단계 2 — 공식 출처 문장으로 교체합니다."
+        "생리식염수로 절단면에 이물질 제거",
+        "생리식염수를 적셔 꽉 짠 거즈 이용 (축축한 거즈 x)",
+        "물이 들어오지 않게 주의 (밀봉 처리)",
+        "냉장고 또는 얼음팩 이용 (단, 얼음과 직접 닿지 않게 수건 이용)"
       ],
       "source": {
-        "name": "임시 출처",
-        "url": "https://example.invalid/temporary",
-        "license": "임시"
-      }
+        "name": "소방청 생활안전정보 「절단상 처치」(원자료: 119구급대원 현장응급처치 표준지침)",
+        "url": "https://nfa.go.kr/nfa/safetyinfo/lifesafety/0001/?boardId=bbs_0000000000002462&mode=view&cntId=7&category=%EC%9D%91%EA%B8%89%EC%B2%98%EC%B9%98&pageIdx=",
+        "license": "공공누리 제1유형(출처표시)"
+      },
+      "media": [
+        {
+          "type": "image",
+          "url": "https://nfa.go.kr/upload/editUpload/20230307/2023030714091628289.jpg",
+          "alt": "절단상 처치 1 이물 제거: 생리식염수로 절단면의 이물질 제거. 2 젖은 거즈로 감싸기: 생리식염수를 적셔 꽉 짠 거즈 이용(축축한 거즈 X). 3 비닐봉지에 담기: 물이 들어오지 않게 주의. 4 냉장 보관: 냉장고 또는 얼음팩 이용(단, 얼음과 직접 닿지 않게 수건 이용).",
+          "source": {
+            "name": "소방청 생활안전정보 「절단상 처치」(원자료: 119구급대원 현장응급처치 표준지침)",
+            "url": "https://nfa.go.kr/nfa/safetyinfo/lifesafety/0001/?boardId=bbs_0000000000002462&mode=view&cntId=7&category=%EC%9D%91%EA%B8%89%EC%B2%98%EC%B9%98&pageIdx=",
+            "license": "공공누리 제1유형(출처표시)"
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.youtube.com/watch?v=1ugEdC7UbTo",
+          "source": {
+            "name": "중앙응급의료센터",
+            "url": "https://www.youtube.com/watch?v=1ugEdC7UbTo",
+            "license": "YouTube 임베드 — 채널 퍼가기 허용 여부 확인 필요"
+          }
+        }
+      ]
+    },
+    {
+      "title": "코피 처치",
+      "steps": [
+        "전방 비출혈의 경우 환자가 조용히 앉아서 머리를 앞으로 숙이고 있거나 콧등 아래의 연골부위를 손으로 쥐고 있는 것만으로도 출혈이 멈출 수 있습니다."
+      ],
+      "source": {
+        "name": "질병관리청 국가건강정보포털 「코피(비출혈)」",
+        "url": "https://health.kdca.go.kr/healthinfo/biz/health/gnrlzHealthInfo/gnrlzHealthInfo/gnrlzHealthInfoView.do?cntnts_sn=3768",
+        "license": "공공누리 제4유형(출처표시·비상업적 이용만·변경금지)"
+      },
+      "media": [
+        {
+          "type": "image",
+          "url": "https://nfa.go.kr/upload/editUpload/20230307/2023030714135852129.jpg",
+          "alt": "코피 처치 1 안정: 앉아서 고개 숙이기 격려. 2 움푹 파인 곳을 누르고 입으로 숨쉬기. 피를 삼키지 말고 뱉으라고 격려.",
+          "source": {
+            "name": "소방청 생활안전정보 「코피」(원자료: 119구급대원 현장응급처치 표준지침)",
+            "url": "https://nfa.go.kr/nfa/safetyinfo/lifesafety/0001/?boardId=bbs_0000000000002462&mode=view&cntId=10&category=%EC%9D%91%EA%B8%89%EC%B2%98%EC%B9%98&pageIdx=",
+            "license": "공공누리 제1유형(출처표시)"
+          }
+        }
+      ]
+    },
+    {
+      "title": "지혈 처치",
+      "steps": [
+        "우선 상처부위의 의복을 벗기거나 잘라 육안으로 상처의 출혈을 확인해야 합니다.",
+        "이후 깨끗한 수건이나 거즈를 이용하여 열상부위를 직접 압박하도록 합니다.",
+        "지혈 후 흐르는 물로 상처를 깨끗이 씻고, 병원 치료가 필요한 경우에는 지체 없이 의료기관을 찾아야 합니다."
+      ],
+      "source": {
+        "name": "질병관리청 국가건강정보포털 「열상」",
+        "url": "https://health.kdca.go.kr/healthinfo/biz/health/gnrlzHealthInfo/gnrlzHealthInfo/gnrlzHealthInfoView.do?cntnts_sn=5679",
+        "license": "공공누리 제4유형(출처표시·비상업적 이용만·변경금지)"
+      },
+      "media": [
+        {
+          "type": "image",
+          "url": "https://nfa.go.kr/upload/editUpload/20230307/2023030714130388083.jpg",
+          "alt": "직접 압박: 장갑 낀 손으로 거즈를 이용해 압박(단, 골절 부위 X, 관통상 X). 2. 붕대 감기: 붕대로 감아 반창고로 고정하고 직접 압박 지속. 3. 올리기: 손상 부위를 심장보다 높게 올리기.",
+          "source": {
+            "name": "소방청 생활안전정보 「지혈 처치」",
+            "url": "https://nfa.go.kr/nfa/safetyinfo/lifesafety/0001/?boardId=bbs_0000000000002462&mode=view&cntId=11&category=%EC%9D%91%EA%B8%89%EC%B2%98%EC%B9%98&pageIdx=",
+            "license": "공공누리 제1유형(출처표시)"
+          }
+        }
+      ]
     }
   ]
 }
