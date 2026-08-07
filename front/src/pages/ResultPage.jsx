@@ -31,7 +31,7 @@ export default function ResultPage() {
       <h1>사진으로 상황 확인</h1>
       {error ? (
         <>
-          <p>{error.message}</p>
+          <p>{error.message || "인식하지 못했어요."}</p>
           <button className="action" onClick={() => setError(null)}>
             다시 시도
           </button>
@@ -41,9 +41,7 @@ export default function ResultPage() {
           </Link>
         </>
       ) : result?.lowConfidence === true ? (
-        <>
-          <Navigate to="/guide" replace />
-        </>
+        <Navigate to="/guide" replace />
       ) : result ? (
         <PhotoResult result={result} />
       ) : (
