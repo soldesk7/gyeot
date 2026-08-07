@@ -102,7 +102,7 @@ hospitalMarkersRef.current = []
   map,
   content: '<div style="width:20px;height:20px;border-radius:50%;background:#e53935;border:2px solid white;box-shadow:0 0 2px rgba(0,0,0,0.5);"></div>',
 })
-//-----------현위치 저장한 overlay를 ref에 저장----------------
+//-----------현위치 마커 overlay를 ref에 저장----------------
 centerOverlayRef.current = overlay
 
   return fetchHospitals(lat, lng).then((data) => { // ← 새 줄 ②: 여기서 return
@@ -129,7 +129,8 @@ centerOverlayRef.current = overlay
 //----------------------마커 + 인포윈도우 배열에 저장------------------------
       hospitalMarkersRef.current.push({ marker, infowindow })
     })
-    // setUsedFallback, setStatus는 여기 안 넣습니다 (다음 단계에서 다르게 처리할 거예요)
+    //----------------------HospitalMapPage함수에서 asOf를 쓰기 위해 return------------------------
+    return data.asOf
   })
 }
 
@@ -142,6 +143,13 @@ export default function HospitalMapPage() {
 const hospitalMarkersRef = useRef([])   // 병원 마커 + 인포윈도우 목록
   const [status, setStatus] = useState('loading') // 'loading' | 'ready' | 'error'
   const [usedFallback, setUsedFallback] = useState(false)
+//----------------------기준시각&다시받기 버튼에 필요한 ref/state------------------------
+  const lastCoordsRef = useRef(null)       // 다시 받기용 — 마지막으로 그린 좌표
+  const [asOf, setAsOf] = useState(null)   // 최근 조회 기준 시각
+  const [minutesSince, setMinutesSince] = useState(null)  // null=아직 안 지남, 숫자면 지난 분
+  const staleTimeoutRef = useRef(null)
+  const staleIntervalRef = useRef(null)
+
 
   useEffect(() => {
     let cancelled = false
@@ -153,11 +161,16 @@ const hospitalMarkersRef = useRef([])   // 병원 마커 + 인포윈도우 목�
         kakaoRef.current = kakao   // ← 새 줄: 나중에 검색 버튼에서 쓰려고 저장
         mapRef.current = map       // ← 새 줄: 나중에 검색 버튼에서 쓰려고 저장
 
-        return showHospitalsAround(kakao, map, position.lat, position.lng, centerOverlayRef, hospitalMarkersRef).then(() => {
+        //----------------------재사용 용도 좌표 저장------------------------
+        lastCoordsRef.current = { lat: position.lat, lng: position.lng }
+        return showHospitalsAround(kakao, map, position.lat, position.lng, centerOverlayRef, hospitalMarkersRef).then((newAsOf) => {
           if (cancelled) return
           setUsedFallback(position.isFallback)
           setStatus('ready')
+          //----------------------기준시각 state에 저장------------------------
+          setAsOf(newAsOf)
         })
+
       })
       .catch(() => {
         if (!cancelled) setStatus('error')
@@ -167,6 +180,38 @@ const hospitalMarkersRef = useRef([])   // 병원 마커 + 인포윈도우 목�
       cancelled = true
     }
   }, [])
+
+//----------------------타이머용 useEffect------------------------
+    useEffect(() => {
+    clearTimeout(staleTimeoutRef.current)
+    clearInterval(staleIntervalRef.current)
+    setMinutesSince(null)
+
+    if (!asOf) return
+
+    const STALE_MS = 6 * 60 * 1000
+    const asOfTime = new Date(asOf).getTime()
+
+    function startStaleDisplay() {
+      setMinutesSince(Math.floor((Date.now() - asOfTime) / 60000))
+      staleIntervalRef.current = setInterval(() => {
+        setMinutesSince(Math.floor((Date.now() - asOfTime) / 60000))
+      }, 60000)
+    }
+
+    const remaining = asOfTime + STALE_MS - Date.now()
+    if (remaining <= 0) {
+      startStaleDisplay()
+    } else {
+      staleTimeoutRef.current = setTimeout(startStaleDisplay, remaining)
+    }
+
+    return () => {
+      clearTimeout(staleTimeoutRef.current)
+      clearInterval(staleIntervalRef.current)
+    }
+  }, [asOf])
+//----------------------타이머용 useEffect 끝------------------------
   
   function handleSearch() {
     const address = addressInputRef.current.value.trim()
@@ -180,22 +225,36 @@ const hospitalMarkersRef = useRef([])   // 병원 마커 + 인포윈도우 목�
     alert('주소를 찾을 수 없습니다.')
     return
   }
-  
+
   const lat = Number(results[0].y)
   const lng = Number(results[0].x)
-
-  showHospitalsAround(kakao, mapRef.current, lat, lng, centerOverlayRef, hospitalMarkersRef)
-  setUsedFallback(false)
+  //----------------------재사용 용도 좌표 저장(내 위치로 조회 방지)------------------------
+  lastCoordsRef.current = { lat, lng }
+    showHospitalsAround(kakao, mapRef.current, lat, lng, centerOverlayRef, hospitalMarkersRef).then(setAsOf)
+setUsedFallback(false)
 })
   }
+  //----------------------다시받기 버튼이 실행할 함수------------------------
+    function handleRefresh() {
+    const coords = lastCoordsRef.current
+    if (!coords) return
+    showHospitalsAround(kakaoRef.current, mapRef.current, coords.lat, coords.lng, centerOverlayRef, hospitalMarkersRef).then(setAsOf)
+  }
+//----------------------다시받기 버튼이 실행할 함수 끝------------------------
 
   return (
     <main className="page">
-      <h1>주변 응급실</h1>
+            <h1>주변 응급실</h1>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <span>{asOf ? formatAsOf(asOf) : '조회 중…'}</span>
+        {minutesSince !== null && <span>· 받은 지 {minutesSince}분이 지났습니다</span>}
+        <button onClick={handleRefresh}>다시 받기</button>
+      </div>
       <div style={{ display: 'flex', gap: '8px' }}>
   <input ref={addressInputRef} type="text" placeholder="주소를 입력하세요" />
   <button onClick={handleSearch}>검색</button>
 </div>
+
       {status === 'error' && (
         <p>지도를 불러오지 못했습니다. VITE_KAKAO_MAP_KEY와 카카오 개발자 콘솔의 도메인 등록을 확인하세요.</p>
       )}
