@@ -1,10 +1,15 @@
 import { ApiError } from "./client";
 
-const MOCK_SCENARIO = "success"; // TODO: 하드코딩으로 MOCK_SCENARIO의 임의의 변수 지정보다 시나리오 이름으로 선택할 수 있어야 합니다. 예를 들면 "success", "low-confidence", "unknown", "rate-limited"를 switch 또는 응답 맵으로 관리하는 방식입니다.
-
+/**
+ * 목으로 화면을 확인할 때 쓰는 파일. 평소에는 어디에서도 import하지 않는다.
+ *
+ * 확인 방법: PhotoUploader의 recognize import를 이 파일로 잠시 바꾸고 아래 값을 원하는
+ * 시나리오로 바꾼다. 확인이 끝나면 둘 다 되돌린다 — 목 import는 커밋하지 않는다.
+ */
+const MOCK_SCENARIO = "success"; 
 export const recognize = (_photo) => {
   switch (MOCK_SCENARIO) {
-    /*** 성공 응답(200) 처리, 시간 초과는 및 안전 필터는 lowConfidence: true ***/
+    /*** 성공 응답(200). 시간 초과·안전 필터 거부도 여기로 오며 lowConfidence가 참이다 ***/
 
     /** 정상: 200 + lowConfidence: false */
     case "success":
