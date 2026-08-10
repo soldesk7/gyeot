@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchGuides } from "../api/guides";
+import NonDiagnosticNotice from "../components/NonDiagnosticNotice.jsx";
 
 export default function CategoryPickerPage() {
     const [categories, setCategories] = useState([]);
@@ -35,6 +36,8 @@ export default function CategoryPickerPage() {
                     {category.title}
                 </Link>
             ))}
+
+            <NonDiagnosticNotice />
             
             <Link className="action" to="/">
                 홈으로
