@@ -1,0 +1,44 @@
+/* 주소 검색 줄 */
+.hospital-search {
+  display: flex;
+  gap: 8px;
+}
+
+.hospital-search input {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+}
+
+/* 기준 시각 + 다시 받기 줄 */
+.hospital-asof {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 제목 + 홈으로 버튼 줄 */
+.hospital-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.hospital-home {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  color: var(--border);
+  background: var(--bg);
+  white-space: nowrap;
+}
+/* 제목 + 홈으로 버튼 줄 */
