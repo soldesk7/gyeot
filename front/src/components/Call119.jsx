@@ -68,23 +68,12 @@ function ReportGuide({ dialogRef, onClose }) {
         tabIndex="-1"
         onKeyDown={handleKeyDown}
         onClick={(event) => event.stopPropagation()}
-        style={{
-          width: 'min(100%, 420px)',
-          padding: 24,
-          borderRadius: 8,
-          background: '#fff',
-          textAlign: 'left',
-        }}
       >
         <p>직접 전화 앱에서 <a href="tel:119">119</a>로 연결해주세요.</p>
-        <h2 id={guideTitleId} style={{ marginTop: 0 }}>
+        <h2 id={guideTitleId}>
           119 구급신고 이렇게 하세요
         </h2>
-        <ol style={{
-          listStyle: 'none',
-          paddingLeft: 0,
-          margin: 0,
-        }}>
+        <ol>
           <li>1. 먼저 환자가 있다는 것을 알려주세요.</li>
           <li>2. 환자의 위치 알려주기 - 주소를 정확히 알려주세요.</li>
           <li>3. 환자가 아픈 곳을 말하기 - 누가 어떤 이유로 어디가 아픈지, 또 의식과 호흡이 있는지 알려주세요.</li>
@@ -92,16 +81,13 @@ function ReportGuide({ dialogRef, onClose }) {
           <li>5. 신고자의 이름과 예비 연락처 말하기 - 신고 장소가 정확하지 않거나 의료지도 필요시 등 연락하는 경우가 있으니, 예비 연락처를 알려주세요.</li>
           <li>6. 의료지도 받고 응급처치하기 - 구급차는 환자 있는 곳으로 가고 있으니, 전화를 끊지 말고 의료 지도를 받고 침착하게 응급처치를 하면서 구급차를 기다립니다.</li>
         </ol>
-        <p style={{fontSize:'12px', color:'#666'}}>출처: <a href="https://119.gg.go.kr/main/cont.do?id=55&menuId=main_006_005" target="_blank" rel="noopener noreferrer">경기도 소방재난본부 「119 신고요령」</a>&nbsp;(공공누리 제1유형)</p>
+        <p className="call119-report-dialog-caption">
+          출처: <a href="https://119.gg.go.kr/main/cont.do?id=55&menuId=main_006_005" target="_blank" rel="noopener noreferrer">경기도 소방재난본부 「119 신고요령」</a>&nbsp;(공공누리 제1유형)
+        </p>
         <button
           type="button"
-          className="action"
+          className="action call119-report-confirm"
           onClick={onClose}
-          style={{
-            width: 'fit-content',
-            margin: '0 auto',
-            padding: '16px 32px',
-          }}
         >
           확인
         </button>
