@@ -9,6 +9,7 @@
 
 import { Link } from 'react-router-dom'
 import Call119 from '../components/Call119.jsx'
+import NonDiagnosticNotice from '../components/NonDiagnosticNotice.jsx'
 
 export default function HomePage() {
   return (
@@ -28,13 +29,7 @@ export default function HomePage() {
       <Link className="action" to="/map">🏥 응급실 지도</Link>
 
       {/* 비진단 고지 — AI가 진단하는 서비스로 보이면 안 된다 (불변 원칙 1) */}
-      <div className="card">
-        <p>
-          이 서비스의 AI는 직접 진단하지 않습니다. 상황을 추정해 소방청 등 공식 기관의
-          응급처치 안내로 연결할 뿐이며, 판단이 서지 않으면 먼저 119입니다.
-        </p>
-        <Link to="/notice">이용 안내·처리방침</Link>
-      </div>
+      <NonDiagnosticNotice />
     </main>
   )
 }

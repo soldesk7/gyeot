@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import PhotoUploader from "../components/PhotoUploader";
 import PhotoResult from "../components/PhotoResult";
+import NonDiagnosticNotice from "../components/NonDiagnosticNotice.jsx";
 
 /**
  * 사진 인식 API가 반환하는 결과입니다.
@@ -29,6 +30,7 @@ export default function ResultPage() {
   return (
     <main className="page">
       <h1>사진으로 상황 확인</h1>
+      <NonDiagnosticNotice />
       {error ? (
         <>
           <p>{error.message || "지금은 사진 인식을 이용할 수 없어요."}</p>
