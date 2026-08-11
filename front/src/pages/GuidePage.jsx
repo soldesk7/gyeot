@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { fetchGuide } from '../api/guides'
 import './GuidePage.css'
+import NonDiagnosticNotice from '../components/NonDiagnosticNotice.jsx'
 
 // <video src>는 mp4 같은 파일만 재생할 수 있다 — 유튜브 시청 페이지 URL은
 // 재생이 안 되고 검은 화면만 뜨므로, embed 주소로 바꿔서 <iframe>으로 그린다.
@@ -74,6 +75,8 @@ export default function GuidePage() {
         <h1>{status === 'ready' ? guide.title : '처치 가이드'}</h1>
         <Link className="guide-back" to="/guide">다른 증상</Link>
       </div>
+      
+      <NonDiagnosticNotice />
 
       {status === 'loading' && <p className="card">불러오는 중이에요…</p>}
 
