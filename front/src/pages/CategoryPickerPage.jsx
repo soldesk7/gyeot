@@ -23,7 +23,7 @@ export default function CategoryPickerPage() {
 
             {lowConfidence && (
                 <p>
-                    사진만으로 상황을 확실하게 판단하기 어려워요. 직접 상황을 선택해주세요.
+                    사진만으로 상황을 확실하게 판단하기 어렵습니다. 직접 상황을 선택해주세요.
                 </p>
             )}
 
