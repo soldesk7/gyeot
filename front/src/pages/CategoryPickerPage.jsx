@@ -22,9 +22,10 @@ export default function CategoryPickerPage() {
             <h1>증상 직접 선택</h1>
 
             {lowConfidence && (
-                <p>
-                    사진만으로 상황을 확실하게 판단하기 어렵습니다. 직접 상황을 선택해주세요.
-                </p>
+                <>
+                <p>사진만으로 상황을 확실하게 판단하기 어렵습니다. 직접 상황을 선택해주세요.</p>
+                <Link to="/result">다른 사진으로 다시 시도</Link>
+                </>
             )}
 
             {loading && (
