@@ -39,6 +39,7 @@ body {
   grid-column: 1;
   min-height: 0;
   overflow: auto;
+  position: relative; /* 자식 요소가 position: absolute이면 이 요소를 기준으로 위치가 잡힌다 */
 }
 
 /* F-17 — 119 배너 (components/Banner119.jsx) */

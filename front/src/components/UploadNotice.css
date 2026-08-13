@@ -7,8 +7,8 @@
     SPA 환경에서는 CSS가 전역 적용될 수 있으므로 반드시 범위 제한
 */
 .upload-notice {
-  position: fixed;
-  inset: 0;
+  position: absolute;                       /* 브라우저 전체가 아닌 부모인 .app-content 영역을 기준으로 배치 */
+  inset: 0;                             /* 119 배너를 제외한 .app-content 영역 전체를 덮도록 상·하·좌·우를 0으로 설정 */
 
   display: flex;
   justify-content: center;
@@ -16,7 +16,7 @@
 
   background: rgba(0, 0, 0, 0.5);       /* rgna() 사용해 뒤 배경 반투명하게 만들어 팝업에 집중하도록 함 */
 
-  z-index: 1000;
+  z-index: 5;
 }
 
 
