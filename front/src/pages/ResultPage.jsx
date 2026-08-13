@@ -43,7 +43,11 @@ export default function ResultPage() {
           </Link>
         </>
       ) : result?.lowConfidence === true ? (
-        <Navigate to="/guide" replace />
+        <Navigate 
+          to="/guide"
+          replace
+          state={{ lowConfidence: true }}
+        />
       ) : result ? (
         <PhotoResult result={result} />
       ) : (
