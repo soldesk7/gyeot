@@ -7,8 +7,8 @@
     SPA 환경에서는 CSS가 전역 적용될 수 있으므로 반드시 범위 제한
 */
 .upload-notice {
-  position: fixed;
-  insert: 0;
+  position: absolute;                       /* 화면 전체를 덮도록 설정 */
+  inset: 0;                             /* 화면 전체를 덮도록 설정 */
 
   display: flex;
   justify-content: center;
@@ -17,8 +17,6 @@
   background: rgba(0, 0, 0, 0.5);       /* rgna() 사용해 뒤 배경 반투명하게 만들어 팝업에 집중하도록 함 */
 
   z-index: 5;
-
-  pointer-events: none;                 /* 팝업 외부 영역은 클릭 불가하도록 설정 */
 }
 
 
@@ -37,8 +35,6 @@
 
   border: 2px solid #444;
   border-radius: 8px;
-
-  pointer-events: auto;                 /* 팝업 영역은 클릭 가능하도록 설정 */
 }
 
 /* 제목 위쪽 여백 제거 */
