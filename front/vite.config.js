@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), basicSsl()],
   server: {
     // 같은 Wi-Fi의 휴대폰·태블릿에서도 Vite 개발 서버에 접속할 수 있게 허용
     host: '0.0.0.0',

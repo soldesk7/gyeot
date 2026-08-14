@@ -41,8 +41,9 @@ npm install
 npm run dev
 ```
 
-`http://localhost:5173`에서 뜬다.
-
+`https://localhost:5173`에서 뜬다.
+    - 위 주소에 대한 자세한 안내는 front/README.md에 작성하였음
+    
 ## 배포
 
 이번 범위에서는 별도의 공개 서버 배포를 하지 않는다 — 개발·시연 모두 로컬 실행을 기준으로 한다.
