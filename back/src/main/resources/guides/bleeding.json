@@ -28,17 +28,17 @@
         },
         {
           "type": "video",
-          "url": "https://www.youtube.com/watch?v=1ugEdC7UbTo",
+          "url": "https://www.youtube.com/watch?v=2Bk1--IrV7o",
           "source": {
-            "name": "중앙응급의료센터",
-            "url": "https://www.youtube.com/watch?v=1ugEdC7UbTo",
-            "license": "YouTube 임베드 — 채널 퍼가기 허용 여부 확인 필요"
+            "name": "농업인안전365",
+            "url": "https://www.youtube.com/watch?v=2Bk1--IrV7o",
+            "license": "공공누리 제1유형(출처표시)"
           }
         }
       ]
     },
     {
-      "title": "코피 처치",
+      "title": "코피",
       "steps": [
         "전방 비출혈의 경우 환자가 조용히 앉아서 머리를 앞으로 숙이고 있거나 콧등 아래의 연골부위를 손으로 쥐고 있는 것만으로도 출혈이 멈출 수 있습니다."
       ],
@@ -53,7 +53,7 @@
           "url": "https://nfa.go.kr/upload/editUpload/20230307/2023030714135852129.jpg",
           "alt": "코피 처치 1 안정: 앉아서 고개 숙이기 격려. 2 움푹 파인 곳을 누르고 입으로 숨쉬기. 피를 삼키지 말고 뱉으라고 격려.",
           "source": {
-            "name": "소방청 생활안전정보 「코피」(원자료: 119구급대원 현장응급처치 표준지침)",
+            "name": "소방청 생활안전정보 「코피(비출혈)」(원자료: 119구급대원 현장응급처치 표준지침)",
             "url": "https://nfa.go.kr/nfa/safetyinfo/lifesafety/0001/?boardId=bbs_0000000000002462&mode=view&cntId=10&category=%EC%9D%91%EA%B8%89%EC%B2%98%EC%B9%98&pageIdx=",
             "license": "공공누리 제1유형(출처표시)"
           }
@@ -61,7 +61,7 @@
       ]
     },
     {
-      "title": "지혈 처치",
+      "title": "지혈",
       "steps": [
         "우선 상처부위의 의복을 벗기거나 잘라 육안으로 상처의 출혈을 확인해야 합니다.",
         "이후 깨끗한 수건이나 거즈를 이용하여 열상부위를 직접 압박하도록 합니다.",
@@ -78,7 +78,7 @@
           "url": "https://nfa.go.kr/upload/editUpload/20230307/2023030714130388083.jpg",
           "alt": "직접 압박: 장갑 낀 손으로 거즈를 이용해 압박(단, 골절 부위 X, 관통상 X). 2. 붕대 감기: 붕대로 감아 반창고로 고정하고 직접 압박 지속. 3. 올리기: 손상 부위를 심장보다 높게 올리기.",
           "source": {
-            "name": "소방청 생활안전정보 「지혈 처치」",
+            "name": "소방청 생활안전정보 「지혈 처치」(원자료: 119구급대원 현장응급처치 표준지침)",
             "url": "https://nfa.go.kr/nfa/safetyinfo/lifesafety/0001/?boardId=bbs_0000000000002462&mode=view&cntId=11&category=%EC%9D%91%EA%B8%89%EC%B2%98%EC%B9%98&pageIdx=",
             "license": "공공누리 제1유형(출처표시)"
           }
