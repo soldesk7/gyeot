@@ -246,12 +246,14 @@ export default function HospitalMapPage() {
     <main className="page">
       <div className="hospital-header">
         <h1>주변 응급실</h1>
-        <Link className="hospital-home" to="/">홈으로</Link>
+        <Link className="action" to="/">홈으로</Link>
       </div>
       <div className="hospital-asof">
-        <span>{asOf ? formatAsOf(asOf) : '조회 중…'}</span>
-        {minutesSince !== null && <span>· 받은 지 {minutesSince}분이 지났습니다</span>}
-        <button className="action" onClick={handleRefresh}>다시 받기</button>
+        <div className="card">
+          <span>{asOf ? formatAsOf(asOf) : '조회 중…'}</span>
+          {minutesSince !== null && <span>· 받은 지 {minutesSince}분이 지났습니다</span>}
+        </div>
+        <button className="action" onClick={handleRefresh}>다시받기</button>
       </div>
       <div className="hospital-search">
         <input ref={addressInputRef} type="text" placeholder="주소를 입력하세요" />

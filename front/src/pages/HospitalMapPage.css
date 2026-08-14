@@ -16,8 +16,26 @@
 .hospital-asof {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: stretch;
   flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.hospital-asof .card {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 74px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2px;
+  overflow: hidden;
+  font-size: 16px;
+}
+
+.hospital-asof .action {
+  flex-shrink: 0;
 }
 
 /* 제목 + 홈으로 버튼 줄 */
@@ -27,18 +45,3 @@
     align-items: center;
     gap: 8px;
 }
-
-.hospital-home {
-  display: inline-block;
-  padding: 8px 12px;
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  color: var(--border);
-  background: var(--bg);
-  white-space: nowrap;
-}
-/* 제목 + 홈으로 버튼 줄 */
