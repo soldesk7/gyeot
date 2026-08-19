@@ -242,7 +242,15 @@ export default function HospitalMapPage() {
   function handleRefresh() {
     const coords = lastCoordsRef.current
     if (!coords) return
-    showHospitalsAround(kakaoRef.current, mapRef.current, coords.lat, coords.lng, centerOverlayRef, hospitalMarkersRef).then(setAsOf)
+    showHospitalsAround(kakaoRef.current, mapRef.current, coords.lat, coords.lng, centerOverlayRef, hospitalMarkersRef)
+      .then((newAsOf) => {
+        setStatus('ready')
+        setAsOf(newAsOf)
+      })
+      .catch(() => {
+        setStatus('hospitals-error')
+        setAsOf(null)
+      })
   }
   //----------------------다시받기 버튼이 실행할 함수 끝------------------------
 
@@ -254,7 +262,7 @@ export default function HospitalMapPage() {
       </div>
       <div className="hospital-asof">
         <div className="card">
-          <span>{asOf ? formatAsOf(asOf) : '조회 중…'}</span>
+          <span>{asOf ? formatAsOf(asOf) : (status === "hospitals-error" || status === "kakao-error" ? "조회 실패" : "조회 중…")}</span>
           {minutesSince !== null && <span>· 받은 지 {minutesSince}분이 지났습니다</span>}
         </div>
         <button className="action" onClick={handleRefresh}>다시받기</button>
@@ -263,7 +271,7 @@ export default function HospitalMapPage() {
         <input ref={addressInputRef} type="text" placeholder="주소를 입력하세요" />
         <button className="action" onClick={handleSearch}>검색</button>
       </div>
-            {status === 'kakao-error' && (
+      {status === 'kakao-error' && (
         <p>지도를 불러오지 못했습니다. VITE_KAKAO_MAP_KEY와 카카오 개발자 콘솔의 도메인 등록을 확인하세요.</p>
       )}
       {status === 'hospitals-error' && (
