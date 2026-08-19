@@ -46,7 +46,7 @@ import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
  * 모든 타입에 {@code @JsonIgnoreProperties(ignoreUnknown = true)}를 붙인 이유: 
  * "선언하지 않은 필드가 XML에 있어도 무시하라"는 뜻 (기본값은 정반대). 
  * 모르는 필드를 만나면 예외를 던지고 파싱이 통째로 실패한다. 
- * 응답에는 11개 필드가 오는데 우리는 이중 3개의 필드만 사용하므로 이 설정이 반드시 필요하다.
+ * 응답에는 우리가 사용하지 않거나 선언조차 하지않은 필드도 함께 오므로 이 설정이 반드시 필요하다.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record EgytListInfoResponse(Header header, Body body) {
