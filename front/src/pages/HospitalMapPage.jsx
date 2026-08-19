@@ -143,7 +143,7 @@ export default function HospitalMapPage() {
   const mapRef = useRef(null)     // ← 새로 추가
   const centerOverlayRef = useRef(null)   // 중심점 빨간 원 (한 개만 존재)
   const hospitalMarkersRef = useRef([])   // 병원 마커 + 인포윈도우 목록
-  const [status, setStatus] = useState('loading') // 'loading' | 'ready' | 'error'
+  const [status, setStatus] = useState('loading') // 'loading' | 'ready' | 'kakao-error' | 'hospitals-error'
   const [usedFallback, setUsedFallback] = useState(false)
   //----------------------기준시각&다시받기 버튼에 필요한 ref/state------------------------
   const lastCoordsRef = useRef(null)       // 다시 받기용 — 마지막으로 그린 좌표
@@ -164,16 +164,20 @@ export default function HospitalMapPage() {
 
         //----------------------재사용 용도 좌표 저장------------------------
         lastCoordsRef.current = { lat: position.lat, lng: position.lng }
-        return showHospitalsAround(kakao, map, position.lat, position.lng, centerOverlayRef, hospitalMarkersRef).then((newAsOf) => {
-          if (cancelled) return
-          setUsedFallback(position.isFallback)
-          setStatus('ready')
-          //----------------------기준시각 state에 저장------------------------
-          setAsOf(newAsOf)
-        })
+        return showHospitalsAround(kakao, map, position.lat, position.lng, centerOverlayRef, hospitalMarkersRef)
+          .then((newAsOf) => {
+            if (cancelled) return
+            setUsedFallback(position.isFallback)
+            setStatus('ready')
+            setAsOf(newAsOf)
+          })
+          .catch(() => {
+            if (!cancelled) setStatus('hospitals-error')
+          })
+
       })
       .catch(() => {
-        if (!cancelled) setStatus('error')
+        if (!cancelled) setStatus('kakao-error')
       })
 
     return () => {
@@ -259,12 +263,16 @@ export default function HospitalMapPage() {
         <input ref={addressInputRef} type="text" placeholder="주소를 입력하세요" />
         <button className="action" onClick={handleSearch}>검색</button>
       </div>
-      {status === 'error' && (
+            {status === 'kakao-error' && (
         <p>지도를 불러오지 못했습니다. VITE_KAKAO_MAP_KEY와 카카오 개발자 콘솔의 도메인 등록을 확인하세요.</p>
+      )}
+      {status === 'hospitals-error' && (
+        <p>주변 응급실 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>
       )}
       {status === 'ready' && usedFallback && (
         <p>현재 위치를 확인할 수 없어 기본 위치를 표시했습니다.</p>
       )}
+
       <div ref={mapContainerRef} style={{ width: '100%', height: '400px' }} />
     </main>
   )
