@@ -11,8 +11,16 @@ export default function PhotoUploader({ onResult, onError }) {
   const [agreed, setAgreed] = useState(false)
   const [photo, setPhoto] = useState(null)
 
+  const MAX_PHOTO_SIZE = 10 * 1024 * 1024 // back/application.properties의 10MB 제한과 동일
+
   const handleSelectPhoto = (e) => {
     const file = e.target.files[0]
+
+      if (file.size > MAX_PHOTO_SIZE) {
+    onError?.({ message: '너무 큰 사진을 업로드했습니다.' })
+    return
+  }
+
     setPhoto(file)
     recognize(file)
       .then((result) => {
